@@ -14,10 +14,10 @@ local tabpage_get_active_buf = function(tabpage)
   return type(buflist) == "number" and buflist or buflist[winnr]
 end
 
----This class is a mockup of the returntype of vim.fn.gettabinfo()
+---This class is a mockup of the returntype of each element in vim.fn.gettabinfo()
 ---@class Tab
 ---@field tabnr integer
----@field variables table
+---@field variables table<string, any>
 ---@field windows integer[]
 
 ---@param tab Tab
@@ -53,7 +53,7 @@ local component_name = function(tab)
   -- TODO: get [No Name] from vim api? i think there is some option to change this
   -- TODO: expand when no name gets set ref: fugitive
 
-  return (tabpage_is_active and HIGHLIGHT_SEL or HIGHLIGHT_NORM) .. name_trim_to_width(name, config.max_name_len) -- TODO: fix hardcoded numbers (22)
+  return (tabpage_is_active and HIGHLIGHT_SEL or HIGHLIGHT_NORM) .. name_trim_to_width(name, config.max_name_len)
 end
 
 ---@param tab Tab
@@ -64,7 +64,7 @@ end
 
 ---@param entry string
 ---@return integer
-local entry_rendered_length = function(entry)
+local entry_rendered_width = function(entry)
   local len_iter = entry:len()
   for highlight in entry:gmatch("%%#.-#") do -- Matches inline hl groups like %#HighlightGroup#
     len_iter = len_iter - highlight:len()
@@ -74,25 +74,29 @@ local entry_rendered_length = function(entry)
 end
 
 ---@param entry string
----@param width integer
 ---@return string left_padding, string right_padding
-local entry_pad_to_width = function(entry, width)
-  local total_padding = width - entry_rendered_length(entry) -- TODO: entry:rendered_length() ?, entry:add_component()
+local entry_pad_to_width = function(entry)
+  local total_padding = config.entry_width - entry_rendered_width(entry) -- TODO: entry:rendered_length() ?, entry:add_component()
+  print(total_padding, entry_rendered_width(entry))
 
-  return (" "):rep(math.floor(total_padding / 2)), (" "):rep(math.ceil(total_padding / 2) + 1)
+  local left_padding = (" "):rep(math.floor(total_padding / 2))
+  local right_padding = (" "):rep(math.ceil(total_padding / 2) + 1) -- +1 because left is also padded with separator
+  print(left_padding:len(), right_padding:len())
+
+  return left_padding, right_padding
 end
 
 ---@param tab Tab
 ---@return string
 local tabline_make_entry = function(tab)
-  local separator = component_separator(tab)
-  local icon = " " .. component_icon(tab)
-  local name = " " .. component_name(tab)
-  local modified = " " .. component_modified(tab)
+  local separator = component_separator(tab) -- TODO: tab:get_separator(), tab:get_icon(), etc.
+  local icon = component_icon(tab)
+  local name = component_name(tab)
+  local modified = component_modified(tab)
   modified = modified:len() > 1 and modified or ""
 
   local entry_unpadded = separator .. icon .. name .. modified
-  local left_padding, right_padding = entry_pad_to_width(entry_unpadded, config.entry_width) -- TODO: fix hardcoded numbers
+  local left_padding, right_padding = entry_pad_to_width(entry_unpadded)
 
   return separator .. left_padding .. icon .. name .. modified .. right_padding
 end

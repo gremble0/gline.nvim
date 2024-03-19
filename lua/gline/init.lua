@@ -11,7 +11,7 @@ local M = {}
 ---@type GlineConfig
 local default_config = {
   entry_width = 26,
-  max_name_len = 20,
+  max_name_len = 15,
   modified_icon = "[+]",
   use_ft_icons = true,
   active_separator = "▎",
