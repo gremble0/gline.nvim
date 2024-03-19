@@ -3,6 +3,7 @@ local HIGHLIGHT_NORM = "%#Tabline#"
 local HIGHLIGHT_NORM_SEP = "%#TablineSep#"
 local HIGHLIGHT_SEL = "%#TablineSel#"
 local HIGHLIGHT_SEL_SEP = "%#TablineSelSep#"
+local config = require("gline").config
 
 ---@param tabpage integer
 ---@return integer id of active buffer in the given tabpage
@@ -52,7 +53,7 @@ local component_name = function(tab)
   -- TODO: get [No Name] from vim api? i think there is some option to change this
   -- TODO: expand when no name gets set ref: fugitive
 
-  return (tabpage_is_active and HIGHLIGHT_SEL or HIGHLIGHT_NORM) .. name_trim_to_width(name, 22) -- TODO: fix hardcoded numbers
+  return (tabpage_is_active and HIGHLIGHT_SEL or HIGHLIGHT_NORM) .. name_trim_to_width(name, config.max_name_len) -- TODO: fix hardcoded numbers (22)
 end
 
 ---@param tab Tab
@@ -91,7 +92,7 @@ local tabline_make_entry = function(tab)
   modified = modified:len() > 1 and modified or ""
 
   local entry_unpadded = separator .. icon .. name .. modified
-  local left_padding, right_padding = entry_pad_to_width(entry_unpadded, 26) -- TODO: fix hardcoded numbers
+  local left_padding, right_padding = entry_pad_to_width(entry_unpadded, config.entry_width) -- TODO: fix hardcoded numbers
 
   return separator .. left_padding .. icon .. name .. modified .. right_padding
 end
