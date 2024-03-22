@@ -11,17 +11,25 @@ local M = {}
 ---@type GlineConfig
 local default_config = {
   entry_width = 22,
-  max_name_len = 15,
-  modified_icon = "[+]",
-  use_ft_icons = true,
+  name = {
+    enabled = true,
+    max_len = 15,
+  },
+  modified = {
+    enabled = true,
+    icon = "●",
+  },
+  ft_icon = {
+    enabled = true, -- if you have web-devicons but want it disabled for this plugin, set to false
+  },
   separator = {
     enabled = true,
     selected = {
-      char = "▎",
+      icon = "▎",
       color = "#e1b655", ---@type string hex color or highlight group
     },
     normal = {
-      char = "▏",
+      icon = "▏",
       color = "#282828", ---@type string hex color or highlight group
     },
   },

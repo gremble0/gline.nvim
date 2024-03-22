@@ -22,7 +22,7 @@ local component_separator = function(tab)
   local active = config.separator.selected
   local inactive = config.separator.normal
 
-  return tab.tabnr == vim.fn.tabpagenr() and (colors.sel_sep .. active.char) or (colors.norm_sep .. inactive.char)
+  return tab.tabnr == vim.fn.tabpagenr() and (colors.sel_sep .. active.icon) or (colors.norm_sep .. inactive.icon)
 end
 
 ---@param tab Tab
@@ -52,13 +52,13 @@ local component_name = function(tab)
   -- TODO: get [No Name] from vim api? i think there is some option to change this
   -- TODO: expand when no name gets set ref: fugitive
 
-  return (tabpage_is_active and colors.sel or colors.norm) .. name_trim_to_width(name, config.max_name_len)
+  return (tabpage_is_active and colors.sel or colors.norm) .. name_trim_to_width(name, config.name.max_len)
 end
 
 ---@param tab Tab
 ---@return string
 local component_modified = function(tab)
-  return vim.api.nvim_buf_get_option(tabpage_get_active_buf(tab.tabnr), "modified") and config.modified_icon or ""
+  return vim.api.nvim_buf_get_option(tabpage_get_active_buf(tab.tabnr), "modified") and config.modified.icon or ""
 end
 
 ---Get the rendered length of an entry, i.e. string length excluding highlight groups
@@ -91,10 +91,9 @@ local tabline_make_entry = function(tab)
   -- TODO: tab:get_separator(), tab:get_icon(), etc.
   local separator = config.separator.enabled and component_separator(tab) or ""
   -- TODO: component_tab_id()
-  local ft_icon = component_ft_icon(tab)
-  local name = component_name(tab)
-  local modified = component_modified(tab)
-  modified = #modified > 1 and modified or ""
+  local ft_icon = config.ft_icon.enabled and component_ft_icon(tab) or ""
+  local name = config.name.enabled and component_name(tab) or ""
+  local modified = config.modified.enabled and component_modified(tab) or ""
 
   local entry_unpadded = separator .. ft_icon .. " " .. name .. " " .. modified
   local left_padding, right_padding = entry_pad_to_width(entry_unpadded)
