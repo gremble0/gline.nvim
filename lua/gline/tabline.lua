@@ -1,10 +1,5 @@
--- Define some shortcuts for highlight groups
-local HIGHLIGHT = "%#TabLine#"
-local HIGHLIGHT_SEP = "%#TabLineSep#"
-local HIGHLIGHT_SEL = "%#TabLineSel#"
-local HIGHLIGHT_SEL_SEP = "%#TabLineSelSep#"
-local HIGHLIGHT_FILL = "%#TabLineFill#"
 local config = require("gline").config
+local colors = require("gline.colors")
 
 ---@param tabpage integer
 ---@return integer id of active buffer in the given tabpage
@@ -24,7 +19,10 @@ end
 ---@param tab Tab
 ---@return string
 local component_separator = function(tab)
-  return tab.tabnr == vim.fn.tabpagenr() and (HIGHLIGHT_SEL_SEP .. "▎") or (HIGHLIGHT_SEP .. "▏")
+  local active = config.separator.selected
+  local inactive = config.separator.normal
+
+  return tab.tabnr == vim.fn.tabpagenr() and (colors.sel_sep .. active.char) or (colors.norm_sep .. inactive.char)
 end
 
 ---@param tab Tab
@@ -54,7 +52,7 @@ local component_name = function(tab)
   -- TODO: get [No Name] from vim api? i think there is some option to change this
   -- TODO: expand when no name gets set ref: fugitive
 
-  return (tabpage_is_active and HIGHLIGHT_SEL or HIGHLIGHT) .. name_trim_to_width(name, config.max_name_len)
+  return (tabpage_is_active and colors.sel or colors.norm) .. name_trim_to_width(name, config.max_name_len)
 end
 
 ---@param tab Tab
@@ -90,7 +88,9 @@ end
 ---@param tab Tab
 ---@return string
 local tabline_make_entry = function(tab)
-  local separator = component_separator(tab) -- TODO: tab:get_separator(), tab:get_icon(), etc.
+  -- TODO: tab:get_separator(), tab:get_icon(), etc.
+  local separator = config.separator.enabled and component_separator(tab) or ""
+  -- TODO: component_tab_id()
   local ft_icon = component_ft_icon(tab)
   local name = component_name(tab)
   local modified = component_modified(tab)
@@ -101,8 +101,6 @@ local tabline_make_entry = function(tab)
 
   local entry = separator .. left_padding .. ft_icon .. " " .. name .. " " .. modified .. right_padding
 
-  assert(entry_rendered_width(entry) == config.entry_width, "Wrong entry len")
-
   return entry
 end
 
@@ -112,5 +110,5 @@ return function()
     tabline_builder = tabline_builder .. tabline_make_entry(tab)
   end
 
-  return tabline_builder .. HIGHLIGHT_FILL
+  return tabline_builder .. colors.fill
 end

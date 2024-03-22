@@ -14,8 +14,17 @@ local default_config = {
   max_name_len = 15,
   modified_icon = "[+]",
   use_ft_icons = true,
-  active_separator = "▎",
-  inactive_separator = "▏",
+  separator = {
+    enabled = true,
+    selected = {
+      char = "▎",
+      color = "#e1b655", ---@type string hex color or highlight group
+    },
+    normal = {
+      char = "▏",
+      color = "#282828", ---@type string hex color or highlight group
+    },
+  },
 }
 
 M.config = default_config
