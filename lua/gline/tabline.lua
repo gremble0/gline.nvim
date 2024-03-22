@@ -1,9 +1,9 @@
 -- Define some shortcuts for highlight groups
-local HIGHLIGHT = "%#Tabline#"
-local HIGHLIGHT_SEP = "%#TablineSep#"
-local HIGHLIGHT_SEL = "%#TablineSel#"
-local HIGHLIGHT_SEL_SEP = "%#TablineSelSep#"
-local HIGHLIGHT_FILL = "%#TablineFill#"
+local HIGHLIGHT = "%#TabLine#"
+local HIGHLIGHT_SEP = "%#TabLineSep#"
+local HIGHLIGHT_SEL = "%#TabLineSel#"
+local HIGHLIGHT_SEL_SEP = "%#TabLineSelSep#"
+local HIGHLIGHT_FILL = "%#TabLineFill#"
 local config = require("gline").config
 
 ---@param tabpage integer
@@ -29,7 +29,7 @@ end
 
 ---@param tab Tab
 ---@return string
-local component_icon = function(tab)
+local component_ft_icon = function(tab)
   local tabpage_active_buf = tabpage_get_active_buf(tab.tabnr) -- TODO: fix?
   local buf_ft = vim.api.nvim_buf_get_option(tabpage_active_buf, "ft")
   -- TODO: pcall() ?
@@ -42,7 +42,7 @@ end
 ---@param width integer
 ---@return string
 local name_trim_to_width = function(name, width)
-  return name:len() > width and name:sub(1, width) .. "…" or name
+  return #name > width and name:sub(1, width) .. "…" or name
 end
 
 ---@param tab Tab
@@ -67,9 +67,10 @@ end
 ---@param entry string
 ---@return integer
 local entry_rendered_width = function(entry)
-  local len_iter = entry:len()
+  -- `#` or `:len()` will not be right here, as that counts bytes, not chars
+  local len_iter = vim.fn.strchars(entry)
   for highlight in entry:gmatch("%%#.-#") do -- Matches inline hl groups like %#HighlightGroup#
-    len_iter = len_iter - highlight:len()
+    len_iter = len_iter - #highlight
   end
 
   return len_iter
@@ -81,7 +82,7 @@ local entry_pad_to_width = function(entry)
   local total_padding = config.entry_width - entry_rendered_width(entry) -- TODO: entry:rendered_length() ?, entry:add_component()
 
   local left_padding = (" "):rep(math.floor(total_padding / 2))
-  local right_padding = (" "):rep(math.ceil(total_padding / 2) + 1) -- +1 because left is also padded with separator
+  local right_padding = (" "):rep(math.ceil(total_padding / 2))
 
   return left_padding, right_padding
 end
@@ -90,15 +91,19 @@ end
 ---@return string
 local tabline_make_entry = function(tab)
   local separator = component_separator(tab) -- TODO: tab:get_separator(), tab:get_icon(), etc.
-  local icon = component_icon(tab)
+  local ft_icon = component_ft_icon(tab)
   local name = component_name(tab)
   local modified = component_modified(tab)
-  modified = modified:len() > 1 and modified or ""
+  modified = #modified > 1 and modified or ""
 
-  local entry_unpadded = separator .. icon .. name .. modified
+  local entry_unpadded = separator .. ft_icon .. " " .. name .. " " .. modified
   local left_padding, right_padding = entry_pad_to_width(entry_unpadded)
 
-  return separator .. left_padding .. icon .. name .. modified .. right_padding
+  local entry = separator .. left_padding .. ft_icon .. " " .. name .. " " .. modified .. right_padding
+
+  assert(entry_rendered_width(entry) == config.entry_width, "Wrong entry len")
+
+  return entry
 end
 
 return function()
