@@ -20,7 +20,7 @@ local default_config = {
 
 M.config = default_config
 
----@param opts GlineConfig
+---@param opts GlineConfig?
 M.setup = function(opts)
   if opts then
     M.config = vim.tbl_extend("force", default_config, opts)

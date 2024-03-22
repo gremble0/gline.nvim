@@ -1,8 +1,9 @@
 -- Define some shortcuts for highlight groups
-local HIGHLIGHT_NORM = "%#Tabline#"
-local HIGHLIGHT_NORM_SEP = "%#TablineSep#"
+local HIGHLIGHT = "%#Tabline#"
+local HIGHLIGHT_SEP = "%#TablineSep#"
 local HIGHLIGHT_SEL = "%#TablineSel#"
 local HIGHLIGHT_SEL_SEP = "%#TablineSelSep#"
+local HIGHLIGHT_FILL = "%#TablineFill#"
 local config = require("gline").config
 
 ---@param tabpage integer
@@ -23,7 +24,7 @@ end
 ---@param tab Tab
 ---@return string
 local component_separator = function(tab)
-  return tab.tabnr == vim.fn.tabpagenr() and (HIGHLIGHT_SEL_SEP .. "▎") or (HIGHLIGHT_NORM_SEP .. "▏")
+  return tab.tabnr == vim.fn.tabpagenr() and (HIGHLIGHT_SEL_SEP .. "▎") or (HIGHLIGHT_SEP .. "▏")
 end
 
 ---@param tab Tab
@@ -41,7 +42,7 @@ end
 ---@param width integer
 ---@return string
 local name_trim_to_width = function(name, width)
-  return name:len() > width and name:sub(1, width - 3) .. "..." or name
+  return name:len() > width and name:sub(1, width) .. "…" or name
 end
 
 ---@param tab Tab
@@ -53,15 +54,16 @@ local component_name = function(tab)
   -- TODO: get [No Name] from vim api? i think there is some option to change this
   -- TODO: expand when no name gets set ref: fugitive
 
-  return (tabpage_is_active and HIGHLIGHT_SEL or HIGHLIGHT_NORM) .. name_trim_to_width(name, config.max_name_len)
+  return (tabpage_is_active and HIGHLIGHT_SEL or HIGHLIGHT) .. name_trim_to_width(name, config.max_name_len)
 end
 
 ---@param tab Tab
 ---@return string
 local component_modified = function(tab)
-  return vim.api.nvim_buf_get_option(tabpage_get_active_buf(tab.tabnr), "modified") and "[+]" or ""
+  return vim.api.nvim_buf_get_option(tabpage_get_active_buf(tab.tabnr), "modified") and config.modified_icon or ""
 end
 
+---Get the rendered length of an entry, i.e. string length excluding highlight groups
 ---@param entry string
 ---@return integer
 local entry_rendered_width = function(entry)
@@ -77,11 +79,9 @@ end
 ---@return string left_padding, string right_padding
 local entry_pad_to_width = function(entry)
   local total_padding = config.entry_width - entry_rendered_width(entry) -- TODO: entry:rendered_length() ?, entry:add_component()
-  print(total_padding, entry_rendered_width(entry))
 
   local left_padding = (" "):rep(math.floor(total_padding / 2))
   local right_padding = (" "):rep(math.ceil(total_padding / 2) + 1) -- +1 because left is also padded with separator
-  print(left_padding:len(), right_padding:len())
 
   return left_padding, right_padding
 end
@@ -107,5 +107,5 @@ return function()
     tabline_builder = tabline_builder .. tabline_make_entry(tab)
   end
 
-  return tabline_builder .. "%#TablineFill#"
+  return tabline_builder .. HIGHLIGHT_FILL
 end
