@@ -1,3 +1,4 @@
+local config = require("gline.config").config
 ---@class GlineColors
 
 ---Check if a string is a hex color i.e. (#000..#fff or #000000..#ffffff)
@@ -6,9 +7,8 @@ local is_hex_color = function(s)
   return s:match("^#%x%x%x$") ~= nil or s:match("^#%x%x%x%x%x%x$") ~= nil
 end
 
----@param config GlineConfig
 ---@return GlineColors
-return function(config)
+return function()
   local Colors = {}
   Colors.tabline_hl = vim.api.nvim_get_hl(0, { name = "TabLine" })
   Colors.tabline_sel_hl = vim.api.nvim_get_hl(0, { name = "TabLineSel" })

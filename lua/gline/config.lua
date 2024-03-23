@@ -35,4 +35,5 @@ M.merge_config = function(partial_config)
   M.config = vim.tbl_extend("force", default_config, partial_config)
 end
 
+--TODO: setmetatable to not have to require(config).config ?
 return M

@@ -1,21 +1,21 @@
 local config = require("gline.config").config
 
----@class GLineEntry
+---@class GlineEntryFactory
 ---@field component_factory GLineComponentFactory
-local Entry = {}
-Entry.__index = Entry
+local EntryFactory = {}
+EntryFactory.__index = EntryFactory
 
 ---@param component_factory GLineComponentFactory
----@return GLineEntry
-function Entry:new(component_factory)
-  local entry = setmetatable({}, Entry)
+---@return GlineEntryFactory
+function EntryFactory:new(component_factory)
+  local entry = setmetatable({}, EntryFactory)
   entry.component_factory = component_factory
   entry.entry = ""
   return entry
 end
 
 ---@return integer
-function Entry:rendered_width()
+function EntryFactory:rendered_width()
   -- `#` or `:len()` will not be right here, as that counts bytes, not chars
   local len_iter = vim.fn.strchars(self.entry)
 
@@ -27,7 +27,7 @@ function Entry:rendered_width()
 end
 
 ---@return string left_padding, string right_padding
-function Entry:pad_to_width()
+function EntryFactory:pad_to_width()
   local total_padding = config.entry_width - self:rendered_width()
 
   local left_padding = (" "):rep(math.floor(total_padding / 2))
@@ -37,7 +37,7 @@ function Entry:pad_to_width()
 end
 
 ---@return string
-function Entry:make(tab)
+function EntryFactory:make(tab)
   local separator = self.component_factory:separator(tab)
   local ft_icon = self.component_factory:ft_icon(tab)
   local name = self.component_factory:name(tab)
@@ -49,4 +49,4 @@ function Entry:make(tab)
   return separator .. left_padding .. ft_icon .. " " .. name .. " " .. modified .. right_padding
 end
 
-return Entry
+return EntryFactory
