@@ -1,4 +1,3 @@
----@class GlineConfigBuilder
 local M = {}
 
 ---@class GlineConfig
@@ -27,6 +26,12 @@ M.config = {
     },
   },
 }
+
+setmetatable(M, {
+  __index = function(_, key)
+    return M.config[key]
+  end,
+})
 
 --TODO: setmetatable to not have to require(config).config ?
 return M

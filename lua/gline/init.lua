@@ -25,7 +25,7 @@ M.setup = function(opts)
   end
 
   -- Only load colors for separators if enabled in user config
-  if Config.config.separator.enabled then
+  if Config.separator.enabled then
     Colors.load_separator_colors()
   end
 

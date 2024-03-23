@@ -6,7 +6,11 @@ local Colors = require("gline.colors")
 local ComponentFactory = {}
 ComponentFactory.__index = ComponentFactory
 
---TODO: take tab in constructor
+---This class is a mockup of the returntype of each element in vim.fn.gettabinfo()
+---@class Tab
+---@field tabnr integer
+---@field variables table<string, any>
+---@field windows integer[]
 
 ---@return GLineComponentFactory
 function ComponentFactory:new()
@@ -15,6 +19,7 @@ function ComponentFactory:new()
 end
 
 ---@param tabpage integer
+---@return integer
 local function tabpage_get_selected_buf(tabpage)
   local buflist = vim.fn.tabpagebuflist(tabpage)
   local winnr = vim.fn.tabpagewinnr(tabpage)
@@ -22,17 +27,24 @@ local function tabpage_get_selected_buf(tabpage)
   return type(buflist) == "number" and buflist or buflist[winnr]
 end
 
+---@param name string
+---@param width integer
+---@return string
 local function name_trim_to_width(name, width)
   return #name > width and name:sub(1, width) .. "…" or name
 end
 
+---@param tab Tab
+---@return string
 function ComponentFactory:separator(tab)
-  local selected = Config.config.separator.selected
-  local normal = Config.config.separator.normal
+  local selected = Config.separator.selected
+  local normal = Config.separator.normal
 
   return tab.tabnr == vim.fn.tabpagenr() and (Colors.sel_sep .. selected.icon) or (Colors.norm_sep .. normal.icon)
 end
 
+---@param tab Tab
+---@return string
 function ComponentFactory:ft_icon(tab)
   local tabpage_is_selected = tab.tabnr == vim.fn.tabpagenr()
   local tabpage_sel_buf = tabpage_get_selected_buf(tab.tabnr)
@@ -59,16 +71,20 @@ function ComponentFactory:ft_icon(tab)
   return "%#" .. icon_hl .. "#" .. icon
 end
 
+---@param tab Tab
+---@return string
 function ComponentFactory:name(tab)
   local tabpage_is_selected = tab.tabnr == vim.fn.tabpagenr()
   local buf_name = vim.fn.bufname(tabpage_get_selected_buf(tab.tabnr))
   local name = buf_name == "" and "[No Name]" or vim.fn.fnamemodify(buf_name, ":t")
-  return (tabpage_is_selected and Colors.sel or Colors.norm) .. name_trim_to_width(name, Config.config.name.max_len)
+
+  return (tabpage_is_selected and Colors.sel or Colors.norm) .. name_trim_to_width(name, Config.name.max_len)
 end
 
+---@param tab Tab
+---@return string
 function ComponentFactory:modified(tab)
-  return vim.api.nvim_buf_get_option(tabpage_get_selected_buf(tab.tabnr), "modified") and Config.config.modified.icon
-    or ""
+  return vim.api.nvim_buf_get_option(tabpage_get_selected_buf(tab.tabnr), "modified") and Config.modified.icon or ""
 end
 
 return ComponentFactory

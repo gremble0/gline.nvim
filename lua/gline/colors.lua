@@ -17,24 +17,20 @@ local is_hex_color = function(s)
 end
 
 M.load_separator_colors = function()
-  if is_hex_color(Config.config.separator.selected.color) then
+  if is_hex_color(Config.separator.selected.color) then
     vim.api.nvim_set_hl(
       0,
       "TabLineSelSep",
-      { fg = Config.config.separator.selected.color, bg = string.format("#%06x", M.sel_bg) }
+      { fg = Config.separator.selected.color, bg = string.format("#%06x", M.sel_bg) }
     )
   else
-    vim.api.nvim_set_hl(0, "TabLineSelSep", { link = Config.config.separator.selected.color })
+    vim.api.nvim_set_hl(0, "TabLineSelSep", { link = Config.separator.selected.color })
   end
 
-  if is_hex_color(Config.config.separator.normal.color) then
-    vim.api.nvim_set_hl(
-      0,
-      "TabLineSep",
-      { fg = Config.config.separator.normal.color, bg = string.format("#%06x", M.norm_bg) }
-    )
+  if is_hex_color(Config.separator.normal.color) then
+    vim.api.nvim_set_hl(0, "TabLineSep", { fg = Config.separator.normal.color, bg = string.format("#%06x", M.norm_bg) })
   else
-    vim.api.nvim_set_hl(0, "TabLineSep", { link = Config.config.separator.normal.color })
+    vim.api.nvim_set_hl(0, "TabLineSep", { link = Config.separator.normal.color })
   end
 end
 
