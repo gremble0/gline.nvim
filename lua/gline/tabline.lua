@@ -1,9 +1,9 @@
-local config = require("gline").config
+local config = require("gline").config -- TODO gline.config
 local colors = require("gline.colors")
 
 ---@param tabpage integer
----@return integer id of active buffer in the given tabpage
-local tabpage_get_active_buf = function(tabpage)
+---@return integer id of selected buffer in the given tabpage
+local tabpage_get_selected_buf = function(tabpage)
   local buflist = vim.fn.tabpagebuflist(tabpage)
   local winnr = vim.fn.tabpagewinnr(tabpage)
 
@@ -19,18 +19,18 @@ end
 ---@param tab Tab
 ---@return string
 local component_separator = function(tab)
-  local separator = config.separator
+  local selected = config.separator.selected
+  local normal = config.separator.normal
 
-  return tab.tabnr == vim.fn.tabpagenr() and (colors.sel_sep .. separator.active_icon)
-    or (colors.norm_sep .. separator.inactive_icon)
+  return tab.tabnr == vim.fn.tabpagenr() and (colors.sel_sep .. selected.icon) or (colors.norm_sep .. normal.icon)
 end
 
 ---@param tab Tab
 ---@return string
 local component_ft_icon = function(tab)
-  local tabpage_active_buf = tabpage_get_active_buf(tab.tabnr)
-  local buf_ft = vim.api.nvim_buf_get_option(tabpage_active_buf, "ft")
-  local tabpage_is_active = tab.tabnr == vim.fn.tabpagenr()
+  local tabpage_is_selected = tab.tabnr == vim.fn.tabpagenr()
+  local tabpage_sel_buf = tabpage_get_selected_buf(tab.tabnr)
+  local buf_ft = vim.api.nvim_buf_get_option(tabpage_sel_buf, "ft")
 
   -- Try to load devicons, if not installed - use fallback
   local ok, devicons = pcall(require, "nvim-web-devicons")
@@ -39,16 +39,14 @@ local component_ft_icon = function(tab)
   end
 
   local icon, icon_color = devicons.get_icon_color_by_filetype(buf_ft, { default = true })
+  local icon_hl = "TabLineIcon" .. buf_ft .. (tabpage_is_selected and "Sel" or "")
 
-  local icon_name = buf_ft or "default"
-  local icon_hl = tabpage_is_active and "TabLineIcon" .. icon_name .. "Active"
-    or "TabLineIcon" .. icon_name .. "Inactive"
-
+  -- TODO: drop ""
   if vim.fn.hlexists(icon_hl) == 0 then
     vim.api.nvim_set_hl(
       0,
       icon_hl,
-      { fg = icon_color, bg = tabpage_is_active and colors.active_bg or colors.inactive_bg }
+      { fg = icon_color, bg = tabpage_is_selected and colors.tabline_sel_hl.bg or colors.tabline_hl.bg }
     )
   end
 
@@ -65,19 +63,19 @@ end
 ---@param tab Tab
 ---@return string
 local component_name = function(tab)
-  local tabpage_is_active = tab.tabnr == vim.fn.tabpagenr()
-  local buf_name = vim.fn.bufname(tabpage_get_active_buf(tab.tabnr))
+  local tabpage_is_selected = tab.tabnr == vim.fn.tabpagenr()
+  local buf_name = vim.fn.bufname(tabpage_get_selected_buf(tab.tabnr))
   local name = buf_name == "" and "[No Name]" or vim.fn.fnamemodify(buf_name, ":t")
   -- TODO: get [No Name] from vim api? i think there is some option to change this
   -- TODO: expand when no name gets set ref: fugitive
 
-  return (tabpage_is_active and colors.sel or colors.norm) .. name_trim_to_width(name, config.name.max_len)
+  return (tabpage_is_selected and colors.sel or colors.norm) .. name_trim_to_width(name, config.name.max_len)
 end
 
 ---@param tab Tab
 ---@return string
 local component_modified = function(tab)
-  return vim.api.nvim_buf_get_option(tabpage_get_active_buf(tab.tabnr), "modified") and config.modified.icon or ""
+  return vim.api.nvim_buf_get_option(tabpage_get_selected_buf(tab.tabnr), "modified") and config.modified.icon or ""
 end
 
 ---Get the rendered length of an entry, i.e. string length excluding highlight groups

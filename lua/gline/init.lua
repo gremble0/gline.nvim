@@ -1,14 +1,6 @@
 local M = {}
 
 ---@class GlineConfig
----@field entry_width? integer
----@field max_name_len? integer
----@field modified_icon? string
----@field use_ft_icons? boolean
----@field active_separator? string
----@field inactive_separator? string
-
----@type GlineConfig
 local default_config = {
   colors = {
     active_bg = "#151515", -- TODO: nil by default
@@ -37,6 +29,7 @@ local default_config = {
   },
 }
 
+---@type GlineConfig
 M.config = default_config
 
 ---@param opts GlineConfig?
