@@ -1,3 +1,7 @@
+local Colors = require("gline.colors")
+local Component = require("gline.component")
+local Entry = require("gline.entry")
+
 local M = {}
 
 ---@class GlineConfig
@@ -30,13 +34,23 @@ local default_config = {
 ---@type GlineConfig
 M.config = default_config
 
+M.tabline = function()
+  local tabline_builder = ""
+  local component_factory = Component:new(M.config, Colors(M.config))
+  for _, tab in ipairs(vim.fn.gettabinfo()) do
+    tabline_builder = tabline_builder .. Entry:new(component_factory, M.config):make(tab)
+  end
+
+  return tabline_builder -- .. colors.fill
+end
+
 ---@param opts GlineConfig?
 M.setup = function(opts)
   if opts then
     M.config = vim.tbl_extend("force", default_config, opts)
   end
 
-  vim.o.tabline = "%!v:lua.require('gline.tabline')()"
+  vim.o.tabline = "%!v:lua.require('gline').tabline()"
 end
 
 return M
