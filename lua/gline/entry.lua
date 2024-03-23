@@ -1,16 +1,16 @@
+local config = require("gline.config").config
+
 ---@class GLineEntry
 ---@field component_factory GLineComponentFactory
----@field config GlineConfig
 local Entry = {}
 Entry.__index = Entry
 
 ---@param component_factory GLineComponentFactory
 ---@return GLineEntry
-function Entry:new(component_factory, config)
+function Entry:new(component_factory)
   local entry = setmetatable({}, Entry)
   entry.component_factory = component_factory
   entry.entry = ""
-  entry.config = config
   return entry
 end
 
@@ -28,7 +28,7 @@ end
 
 ---@return string left_padding, string right_padding
 function Entry:pad_to_width()
-  local total_padding = self.config.tab_width - self:rendered_width()
+  local total_padding = config.entry_width - self:rendered_width()
 
   local left_padding = (" "):rep(math.floor(total_padding / 2))
   local right_padding = (" "):rep(math.ceil(total_padding / 2))

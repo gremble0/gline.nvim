@@ -1,53 +1,25 @@
 local Colors = require("gline.colors")
 local Component = require("gline.component")
 local Entry = require("gline.entry")
+local Config = require("gline.config")
 
 local M = {}
 
----@class GlineConfig
-local default_config = {
-  tab_width = 22, -- Width of each tab/entry in the tabline
-  name = {
-    enabled = true,
-    max_len = 15, -- Max characters in name of active buffer for each tab
-  },
-  modified = {
-    enabled = true,
-    icon = "●",
-  },
-  ft_icon = {
-    enabled = true, -- if you have web-devicons but want it disabled for this plugin, set to false
-  },
-  separator = {
-    enabled = true,
-    selected = {
-      icon = "▎",
-      color = "Statement", ---@type string hex color or highlight group
-    },
-    normal = {
-      icon = "▏",
-      color = "VertSplit", ---@type string hex color or highlight group
-    },
-  },
-}
-
----@type GlineConfig
-M.config = default_config
-
 M.tabline = function()
   local tabline_builder = ""
-  local component_factory = Component:new(M.config, Colors(M.config))
+  local colors = Colors(Config.config)
+  local component_factory = Component:new(colors)
   for _, tab in ipairs(vim.fn.gettabinfo()) do
-    tabline_builder = tabline_builder .. Entry:new(component_factory, M.config):make(tab)
+    tabline_builder = tabline_builder .. Entry:new(component_factory):make(tab)
   end
 
-  return tabline_builder -- .. colors.fill
+  return tabline_builder .. colors.fill
 end
 
 ---@param opts GlineConfig?
 M.setup = function(opts)
   if opts then
-    M.config = vim.tbl_extend("force", default_config, opts)
+    Config.merge_config(opts)
   end
 
   vim.o.tabline = "%!v:lua.require('gline').tabline()"

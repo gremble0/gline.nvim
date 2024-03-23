@@ -1,15 +1,14 @@
+local config = require("gline.config").config
+
 ---@class GLineComponentFactory
----@field config GlineConfig
 ---@field colors GlineColors
 local ComponentFactory = {}
 ComponentFactory.__index = ComponentFactory
 
----@param config GlineConfig
 ---@param colors GlineColors
 ---@return GLineComponentFactory
-function ComponentFactory:new(config, colors)
+function ComponentFactory:new(colors)
   local component = setmetatable({}, ComponentFactory)
-  component.config = config
   component.colors = colors
   return component
 end
@@ -27,8 +26,8 @@ local function name_trim_to_width(name, width)
 end
 
 function ComponentFactory:separator(tab)
-  local selected = self.config.separator.selected
-  local normal = self.config.separator.normal
+  local selected = config.separator.selected
+  local normal = config.separator.normal
 
   return tab.tabnr == vim.fn.tabpagenr() and (self.colors.sel_sep .. selected.icon)
     or (self.colors.norm_sep .. normal.icon)
@@ -63,13 +62,11 @@ function ComponentFactory:name(tab)
   local tabpage_is_selected = tab.tabnr == vim.fn.tabpagenr()
   local buf_name = vim.fn.bufname(tabpage_get_selected_buf(tab.tabnr))
   local name = buf_name == "" and "[No Name]" or vim.fn.fnamemodify(buf_name, ":t")
-  return (tabpage_is_selected and self.colors.sel or self.colors.norm)
-    .. name_trim_to_width(name, self.config.name.max_len)
+  return (tabpage_is_selected and self.colors.sel or self.colors.norm) .. name_trim_to_width(name, config.name.max_len)
 end
 
 function ComponentFactory:modified(tab)
-  return vim.api.nvim_buf_get_option(tabpage_get_selected_buf(tab.tabnr), "modified") and self.config.modified.icon
-    or ""
+  return vim.api.nvim_buf_get_option(tabpage_get_selected_buf(tab.tabnr), "modified") and config.modified.icon or ""
 end
 
 return ComponentFactory
