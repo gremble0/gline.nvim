@@ -1,4 +1,5 @@
-local config = require("gline.config").config
+local Config = require("gline.config")
+local Colors = require("gline.colors")
 
 ---@class GLineComponentFactory
 ---@field colors GlineColors
@@ -13,17 +14,6 @@ function ComponentFactory:new()
   return component
 end
 
----@class GlineColors
-local Colors = {
-  norm = "%#TabLine#",
-  sel = "%#TabLineSel#",
-  fill = "%#TabLineFill#",
-  sel_sep = "%#TabLineSelSep#",
-  norm_sep = "%#TabLineSep#",
-  sel_bg = vim.api.nvim_get_hl(0, { name = "TabLineSel" }).bg, -- should never error, every theme has TabLine hl groups
-  norm_bg = vim.api.nvim_get_hl(0, { name = "TabLine" }).bg, -- should never error, every theme has TabLine hl groups
-}
-
 ---@param tabpage integer
 local function tabpage_get_selected_buf(tabpage)
   local buflist = vim.fn.tabpagebuflist(tabpage)
@@ -37,8 +27,8 @@ local function name_trim_to_width(name, width)
 end
 
 function ComponentFactory:separator(tab)
-  local selected = config.separator.selected
-  local normal = config.separator.normal
+  local selected = Config.config.separator.selected
+  local normal = Config.config.separator.normal
 
   return tab.tabnr == vim.fn.tabpagenr() and (Colors.sel_sep .. selected.icon) or (Colors.norm_sep .. normal.icon)
 end
@@ -73,11 +63,12 @@ function ComponentFactory:name(tab)
   local tabpage_is_selected = tab.tabnr == vim.fn.tabpagenr()
   local buf_name = vim.fn.bufname(tabpage_get_selected_buf(tab.tabnr))
   local name = buf_name == "" and "[No Name]" or vim.fn.fnamemodify(buf_name, ":t")
-  return (tabpage_is_selected and Colors.sel or Colors.norm) .. name_trim_to_width(name, config.name.max_len)
+  return (tabpage_is_selected and Colors.sel or Colors.norm) .. name_trim_to_width(name, Config.config.name.max_len)
 end
 
 function ComponentFactory:modified(tab)
-  return vim.api.nvim_buf_get_option(tabpage_get_selected_buf(tab.tabnr), "modified") and config.modified.icon or ""
+  return vim.api.nvim_buf_get_option(tabpage_get_selected_buf(tab.tabnr), "modified") and Config.config.modified.icon
+    or ""
 end
 
 return ComponentFactory

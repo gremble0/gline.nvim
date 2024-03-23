@@ -1,8 +1,8 @@
----@class GlineConfig
+---@class GlineConfigBuilder
 local M = {}
 
 ---@class GlineConfig
-local default_config = {
+M.config = {
   entry_width = 22, -- Width of each tab/entry in the tabline
   name = {
     enabled = true,
@@ -27,13 +27,6 @@ local default_config = {
     },
   },
 }
-
-M.config = default_config
-
----@param partial_config GlineConfig
-M.merge_config = function(partial_config)
-  M.config = vim.tbl_extend("force", default_config, partial_config)
-end
 
 --TODO: setmetatable to not have to require(config).config ?
 return M
