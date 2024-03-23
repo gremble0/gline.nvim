@@ -2,10 +2,10 @@ local M = {}
 
 ---@class GlineConfig
 local default_config = {
-  entry_width = 22,
+  tab_width = 22, -- Width of each tab/entry in the tabline
   name = {
     enabled = true,
-    max_len = 15,
+    max_len = 15, -- Max characters in name of active buffer for each tab
   },
   modified = {
     enabled = true,
@@ -18,11 +18,11 @@ local default_config = {
     enabled = true,
     selected = {
       icon = "▎",
-      color = "#e1b655", ---@type string hex color or highlight group
+      color = "Statement", ---@type string hex color or highlight group
     },
     normal = {
       icon = "▏",
-      color = "#282828", ---@type string hex color or highlight group
+      color = "VertSplit", ---@type string hex color or highlight group
     },
   },
 }

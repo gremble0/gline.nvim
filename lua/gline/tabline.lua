@@ -32,22 +32,24 @@ local component_ft_icon = function(tab)
   local tabpage_sel_buf = tabpage_get_selected_buf(tab.tabnr)
   local buf_ft = vim.api.nvim_buf_get_option(tabpage_sel_buf, "ft")
 
-  -- Try to load devicons, if not installed - use fallback
+  local icon_bg = tabpage_is_selected and colors.tabline_sel_hl.bg or colors.tabline_hl.bg
+
+  -- Try to load devicons, if not installed - use fallback (same icon as devicons' default)
   local ok, devicons = pcall(require, "nvim-web-devicons")
   if not ok then
-    return "%#Constant#" -- TODO: add config for this highlight?, fallback here
+    local icon_hl = "TabLineIconFallback" .. (tabpage_is_selected and "Sel" or "")
+    if vim.fn.hlexists(icon_hl) == 0 then
+      vim.api.nvim_set_hl(0, icon_hl, { fg = "#6d8086", bg = icon_bg })
+    end
+
+    return "%#" .. icon_hl .. "#" .. ""
   end
 
   local icon, icon_color = devicons.get_icon_color_by_filetype(buf_ft, { default = true })
   local icon_hl = "TabLineIcon" .. buf_ft .. (tabpage_is_selected and "Sel" or "")
 
-  -- TODO: drop ""
   if vim.fn.hlexists(icon_hl) == 0 then
-    vim.api.nvim_set_hl(
-      0,
-      icon_hl,
-      { fg = icon_color, bg = tabpage_is_selected and colors.tabline_sel_hl.bg or colors.tabline_hl.bg }
-    )
+    vim.api.nvim_set_hl(0, icon_hl, { fg = icon_color, bg = icon_bg })
   end
 
   return "%#" .. icon_hl .. "#" .. icon
@@ -95,7 +97,7 @@ end
 ---@param entry string
 ---@return string left_padding, string right_padding
 local entry_pad_to_width = function(entry)
-  local total_padding = config.entry_width - entry_rendered_width(entry) -- TODO: entry:rendered_length() ?, entry:add_component()
+  local total_padding = config.tab_width - entry_rendered_width(entry) -- TODO: entry:rendered_length() ?, entry:add_component()
 
   local left_padding = (" "):rep(math.floor(total_padding / 2))
   local right_padding = (" "):rep(math.ceil(total_padding / 2))
