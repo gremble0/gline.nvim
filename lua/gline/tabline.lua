@@ -19,10 +19,10 @@ end
 ---@param tab Tab
 ---@return string
 local component_separator = function(tab)
-  local active = config.separator.selected
-  local inactive = config.separator.normal
+  local separator = config.separator
 
-  return tab.tabnr == vim.fn.tabpagenr() and (colors.sel_sep .. active.icon) or (colors.norm_sep .. inactive.icon)
+  return tab.tabnr == vim.fn.tabpagenr() and (colors.sel_sep .. separator.active_icon)
+    or (colors.norm_sep .. separator.inactive_icon)
 end
 
 ---@param tab Tab
@@ -30,16 +30,29 @@ end
 local component_ft_icon = function(tab)
   local tabpage_active_buf = tabpage_get_active_buf(tab.tabnr)
   local buf_ft = vim.api.nvim_buf_get_option(tabpage_active_buf, "ft")
+  local tabpage_is_active = tab.tabnr == vim.fn.tabpagenr()
 
   -- Try to load devicons, if not installed - use fallback
   local ok, devicons = pcall(require, "nvim-web-devicons")
   if not ok then
     return "%#Constant#" -- TODO: add config for this highlight?, fallback here
-  else
-    local icon, icon_hl = devicons.get_icon_by_filetype(buf_ft, { default = true })
-
-    return "%#" .. icon_hl .. "#" .. icon
   end
+
+  local icon, icon_color = devicons.get_icon_color_by_filetype(buf_ft, { default = true })
+
+  local icon_name = buf_ft or "default"
+  local icon_hl = tabpage_is_active and "TabLineIcon" .. icon_name .. "Active"
+    or "TabLineIcon" .. icon_name .. "Inactive"
+
+  if vim.fn.hlexists(icon_hl) == 0 then
+    vim.api.nvim_set_hl(
+      0,
+      icon_hl,
+      { fg = icon_color, bg = tabpage_is_active and colors.active_bg or colors.inactive_bg }
+    )
+  end
+
+  return "%#" .. icon_hl .. "#" .. icon
 end
 
 ---@param name string
