@@ -28,12 +28,18 @@ end
 ---@param tab Tab
 ---@return string
 local component_ft_icon = function(tab)
-  local tabpage_active_buf = tabpage_get_active_buf(tab.tabnr) -- TODO: fix?
+  local tabpage_active_buf = tabpage_get_active_buf(tab.tabnr)
   local buf_ft = vim.api.nvim_buf_get_option(tabpage_active_buf, "ft")
-  -- TODO: pcall() ?
-  local icon, icon_hl = require("nvim-web-devicons").get_icon_by_filetype(buf_ft, { default = true })
 
-  return "%#" .. icon_hl .. "#" .. icon
+  -- Try to load devicons, if not installed - use fallback
+  local ok, devicons = pcall(require, "nvim-web-devicons")
+  if not ok then
+    return "%#Constant#" -- TODO: add config for this highlight?, fallback here
+  else
+    local icon, icon_hl = devicons.get_icon_by_filetype(buf_ft, { default = true })
+
+    return "%#" .. icon_hl .. "#" .. icon
+  end
 end
 
 ---@param name string
@@ -67,6 +73,7 @@ end
 local entry_rendered_width = function(entry)
   -- `#` or `:len()` will not be right here, as that counts bytes, not chars
   local len_iter = vim.fn.strchars(entry)
+
   for highlight in entry:gmatch("%%#.-#") do -- Matches inline hl groups like %#HighlightGroup#
     len_iter = len_iter - #highlight
   end
