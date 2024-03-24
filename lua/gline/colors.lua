@@ -25,13 +25,17 @@ local set_separator_highlights = function()
       { fg = Config.separator.selected.color, bg = string.format("#%06x", M.sel_bg) }
     )
   else
-    vim.api.nvim_set_hl(0, "TabLineSelSep", { link = Config.separator.selected.color })
+    -- Use foreground from configs highlight group, use background from theme's TabLineSel
+    local sep_sel_fg = vim.api.nvim_get_hl(0, { name = Config.separator.selected.color }).fg
+    vim.api.nvim_set_hl(0, "TabLineSelSep", { fg = sep_sel_fg, bg = string.format("#%06x", M.sel_bg) })
   end
 
   if is_hex_color(Config.separator.normal.color) then
     vim.api.nvim_set_hl(0, "TabLineSep", { fg = Config.separator.normal.color, bg = string.format("#%06x", M.norm_bg) })
   else
-    vim.api.nvim_set_hl(0, "TabLineSep", { link = Config.separator.normal.color })
+    -- Use foreground from configs highlight group, use background from theme's TabLine
+    local sep_norm_fg = vim.api.nvim_get_hl(0, { name = Config.separator.normal.color }).fg
+    vim.api.nvim_set_hl(0, "TabLineSep", { fg = sep_norm_fg, bg = string.format("#%06x", M.norm_bg) })
   end
 end
 

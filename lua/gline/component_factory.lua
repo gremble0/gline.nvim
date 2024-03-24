@@ -27,6 +27,7 @@ function ComponentFactory:ft_icon(tab)
   local selected_buf_ft = vim.api.nvim_buf_get_option(tab.selected_buf, "ft")
   local icon_bg = tab.is_selected and Colors.sel_bg or Colors.norm_bg
 
+  -- Try to load devicons, use fallback if fails
   local ok, devicons = pcall(require, "nvim-web-devicons")
   if not ok then
     local icon_hl = "TabLineIconFallback" .. (tab.is_selected and "Sel" or "")

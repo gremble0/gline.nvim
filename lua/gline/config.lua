@@ -18,11 +18,11 @@ M.config = {
     enabled = true,
     selected = {
       icon = "▎",
-      color = "Statement", -- hex color(#000 | #000000) or highlight group
+      color = "Statement", -- hex color(#000 | #000000) or highlight group. If its a highlight group only use its foreground
     },
     normal = {
       icon = "▏",
-      color = "VertSplit", -- hex color(#000 | #000000) or highlight group
+      color = "VertSplit", -- hex color(#000 | #000000) or highlight group. If its a highlight group only use its foreground
     },
   },
 }

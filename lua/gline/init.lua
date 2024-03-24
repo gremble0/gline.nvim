@@ -29,6 +29,7 @@ local M = {}
 
 ---@return TabInfo[]
 local get_tab_info = function()
+  ---@type TabInfo[]
   local tab_infos = vim.fn.gettabinfo()
   for _, tab_info in ipairs(tab_infos) do
     tab_info.is_selected = tab_info.tabnr == vim.fn.tabpagenr()
