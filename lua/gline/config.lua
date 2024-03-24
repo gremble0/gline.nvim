@@ -34,6 +34,7 @@ M.merge_config = function(conf)
   end
 end
 
+-- So you can do require("gline.config").entry_width instead of require("gline.config").config.entry_width
 setmetatable(M, {
   __index = function(_, key)
     return M.config[key]

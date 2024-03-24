@@ -8,8 +8,9 @@ local M = {
   sel_sep = "%#TabLineSelSep#",
   norm_sep = "%#TabLineSep#",
 
-  sel_bg = vim.api.nvim_get_hl(0, { name = "TabLineSel" }).bg, -- should never error, every theme has TabLine hl groups
-  norm_bg = vim.api.nvim_get_hl(0, { name = "TabLine" }).bg, -- should never error, every theme has TabLine hl groups
+  -- should never error, every theme has TabLine hl groups
+  sel_bg = vim.api.nvim_get_hl(0, { name = "TabLineSel" }).bg,
+  norm_bg = vim.api.nvim_get_hl(0, { name = "TabLine" }).bg,
 }
 
 local is_hex_color = function(s)

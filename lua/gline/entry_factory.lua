@@ -1,4 +1,5 @@
 local Config = require("gline.config")
+local Colors = require("gline.colors")
 
 ---Used to make complete tab entries in the tabline. :make(tab) will return a string
 ---for that tabs information based on the users config
@@ -39,7 +40,7 @@ function EntryFactory:new(component_factory)
   return entry
 end
 
----@param tab Tab
+---@param tab TabInfo
 ---@return string
 function EntryFactory:make(tab)
   local separator = Config.separator.enabled and self.component_factory:separator(tab) or ""
@@ -50,7 +51,15 @@ function EntryFactory:make(tab)
   local entry = separator .. ft_icon .. " " .. name .. " " .. modified
   local left_padding, right_padding = get_padding(entry)
 
-  return separator .. left_padding .. ft_icon .. " " .. name .. " " .. modified .. right_padding
+  return (tab.is_selected and Colors.sel or Colors.norm)
+    .. separator
+    .. left_padding
+    .. ft_icon
+    .. " "
+    .. name
+    .. " "
+    .. modified
+    .. right_padding
 end
 
 return EntryFactory

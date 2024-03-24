@@ -18,13 +18,32 @@ local Colors = require("gline.colors")
 
 local M = {}
 
+---This class is a mockup of the returntype of each element in vim.fn.gettabinfo()
+---@class TabInfo
+---@field tabnr integer
+---@field variables table<string, any>
+---@field windows integer[]
+---@field is_selected boolean
+
+---TODO: extended gettabinfo()
+
+---@return TabInfo[]
+local get_tab_info = function()
+  local tab_infos = vim.fn.gettabinfo()
+  for _, tab_info in ipairs(tab_infos) do
+    tab_info.is_selected = tab_info.tabnr == vim.fn.tabpagenr()
+  end
+
+  return tab_infos
+end
+
 M.tabline = function()
   local tabline_builder = ""
 
   local component_factory = ComponentFactory:new()
   local entry_factory = EntryFactory:new(component_factory)
 
-  for _, tab in ipairs(vim.fn.gettabinfo()) do
+  for _, tab in ipairs(get_tab_info()) do
     tabline_builder = tabline_builder .. entry_factory:make(tab)
   end
 
