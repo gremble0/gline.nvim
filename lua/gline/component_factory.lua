@@ -12,22 +12,6 @@ function ComponentFactory:new()
   return component
 end
 
----@param tabpage integer
----@return integer
-local function tabpage_get_selected_buf(tabpage)
-  local buflist = vim.fn.tabpagebuflist(tabpage)
-  local winnr = vim.fn.tabpagewinnr(tabpage)
-
-  return type(buflist) == "number" and buflist or buflist[winnr]
-end
-
----@param name string
----@param width integer
----@return string
-local function name_trim_to_width(name, width)
-  return #name > width and name:sub(1, width) .. "…" or name
-end
-
 ---@param tab TabInfo
 ---@return string
 function ComponentFactory:separator(tab)
@@ -40,8 +24,7 @@ end
 ---@param tab TabInfo
 ---@return string
 function ComponentFactory:ft_icon(tab)
-  local tabpage_sel_buf = tabpage_get_selected_buf(tab.tabnr)
-  local buf_ft = vim.api.nvim_buf_get_option(tabpage_sel_buf, "ft")
+  local selected_buf_ft = vim.api.nvim_buf_get_option(tab.selected_buf, "ft")
   local icon_bg = tab.is_selected and Colors.sel_bg or Colors.norm_bg
 
   local ok, devicons = pcall(require, "nvim-web-devicons")
@@ -54,8 +37,8 @@ function ComponentFactory:ft_icon(tab)
     return "%#" .. icon_hl .. "#" .. ""
   end
 
-  local icon, icon_color = devicons.get_icon_color_by_filetype(buf_ft, { default = true })
-  local icon_hl = "TabLineIcon" .. buf_ft .. (tab.is_selected and "Sel" or "")
+  local icon, icon_color = devicons.get_icon_color_by_filetype(selected_buf_ft, { default = true })
+  local icon_hl = "TabLineIcon" .. selected_buf_ft .. (tab.is_selected and "Sel" or "")
 
   if vim.fn.hlexists(icon_hl) == 0 then
     vim.api.nvim_set_hl(0, icon_hl, { fg = icon_color, bg = icon_bg })
@@ -67,16 +50,20 @@ end
 ---@param tab TabInfo
 ---@return string
 function ComponentFactory:name(tab)
-  local buf_name = vim.fn.bufname(tabpage_get_selected_buf(tab.tabnr))
-  local name = buf_name == "" and "[No Name]" or vim.fn.fnamemodify(buf_name, ":t")
+  local selected_buf_name = vim.fn.bufname(tab.selected_buf)
+  local name = selected_buf_name == "" and "[No Name]" or vim.fn.fnamemodify(selected_buf_name, ":t")
 
-  return (tab.is_selected and Colors.sel or Colors.norm) .. name_trim_to_width(name, Config.name.max_len)
+  if #name > Config.name.max_len then
+    name = name:sub(1, Config.name.max_len) .. "…"
+  end
+
+  return (tab.is_selected and Colors.sel or Colors.norm) .. name
 end
 
 ---@param tab TabInfo
 ---@return string
 function ComponentFactory:modified(tab)
-  return vim.api.nvim_buf_get_option(tabpage_get_selected_buf(tab.tabnr), "modified") and Config.modified.icon or ""
+  return vim.api.nvim_buf_get_option(tab.selected_buf, "modified") and Config.modified.icon or ""
 end
 
 return ComponentFactory

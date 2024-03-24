@@ -18,20 +18,24 @@ local Colors = require("gline.colors")
 
 local M = {}
 
----This class is a mockup of the returntype of each element in vim.fn.gettabinfo()
+---This class is a mockup of the returntype of each element in vim.fn.gettabinfo() extended
+---with some additional information
 ---@class TabInfo
 ---@field tabnr integer
 ---@field variables table<string, any>
 ---@field windows integer[]
 ---@field is_selected boolean
-
----TODO: extended gettabinfo()
+---@field selected_buf integer
 
 ---@return TabInfo[]
 local get_tab_info = function()
   local tab_infos = vim.fn.gettabinfo()
   for _, tab_info in ipairs(tab_infos) do
     tab_info.is_selected = tab_info.tabnr == vim.fn.tabpagenr()
+
+    local buflist = vim.fn.tabpagebuflist(tab_info.tabnr)
+    local winnr = vim.fn.tabpagewinnr(tab_info.tabnr)
+    tab_info.selected_buf = type(buflist) == "number" and buflist or buflist[winnr]
   end
 
   return tab_infos
