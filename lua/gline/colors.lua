@@ -1,6 +1,6 @@
 local Config = require("gline.config")
 
----@class GlineColors
+---@class Gline.Colors
 local M = {
   norm = "%#TabLine#",
   sel = "%#TabLineSel#",
@@ -16,7 +16,7 @@ local is_hex_color = function(s)
   return s:match("^#%x%x%x$") ~= nil or s:match("^#%x%x%x%x%x%x$") ~= nil
 end
 
-M.load_separator_colors = function()
+local set_separator_highlights = function()
   if is_hex_color(Config.separator.selected.color) then
     vim.api.nvim_set_hl(
       0,
@@ -31,6 +31,12 @@ M.load_separator_colors = function()
     vim.api.nvim_set_hl(0, "TabLineSep", { fg = Config.separator.normal.color, bg = string.format("#%06x", M.norm_bg) })
   else
     vim.api.nvim_set_hl(0, "TabLineSep", { link = Config.separator.normal.color })
+  end
+end
+
+M.set_highlights = function()
+  if Config.separator.enabled then
+    set_separator_highlights()
   end
 end
 

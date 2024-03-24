@@ -1,7 +1,9 @@
 local Config = require("gline.config")
 
----@class GlineEntryFactory
----@field component_factory GLineComponentFactory
+---Used to make complete tab entries in the tabline. :make(tab) will return a string
+---for that tabs information based on the users config
+---@class Gline.EntryFactory
+---@field component_factory GLine.ComponentFactory
 local EntryFactory = {}
 EntryFactory.__index = EntryFactory
 
@@ -29,8 +31,8 @@ local get_padding = function(s)
   return left_padding, right_padding
 end
 
----@param component_factory GLineComponentFactory
----@return GlineEntryFactory
+---@param component_factory GLine.ComponentFactory
+---@return Gline.EntryFactory
 function EntryFactory:new(component_factory)
   local entry = setmetatable({}, EntryFactory)
   entry.component_factory = component_factory

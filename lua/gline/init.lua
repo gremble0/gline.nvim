@@ -1,5 +1,18 @@
-local ComponentFactory = require("gline.component_factory")
-local EntryFactory = require("gline.entry_factory")
+---@param path string
+---@return table
+local lazy_require = function(path)
+  return setmetatable({}, {
+    __index = function(_, key)
+      return require(path)[key]
+    end,
+    __newindex = function(_, key, value)
+      require(path)[key] = value
+    end,
+  })
+end
+
+local ComponentFactory = lazy_require("gline.component_factory")
+local EntryFactory = lazy_require("gline.entry_factory")
 local Config = require("gline.config")
 local Colors = require("gline.colors")
 
@@ -15,19 +28,13 @@ M.tabline = function()
     tabline_builder = tabline_builder .. entry_factory:make(tab)
   end
 
-  return tabline_builder .. "%#TabLineFill#"
+  return tabline_builder .. Colors.fill
 end
 
----@param opts GlineConfig?
-M.setup = function(opts)
-  if opts then
-    Config.config = vim.tbl_deep_extend("force", Config.config, opts)
-  end
-
-  -- Only load colors for separators if enabled in user config
-  if Config.separator.enabled then
-    Colors.load_separator_colors()
-  end
+---@param conf Gline.Config?
+M.setup = function(conf)
+  Config.merge_config(conf)
+  Colors.set_highlights()
 
   vim.o.tabline = "%!v:lua.require('gline').tabline()"
 end

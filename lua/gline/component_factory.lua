@@ -1,8 +1,8 @@
 local Config = require("gline.config")
 local Colors = require("gline.colors")
 
----@class GLineComponentFactory
----@field colors GlineColors
+---Use one of this class' methods to make a component to put in a tab entry
+---@class GLine.ComponentFactory
 local ComponentFactory = {}
 ComponentFactory.__index = ComponentFactory
 
@@ -12,7 +12,7 @@ ComponentFactory.__index = ComponentFactory
 ---@field variables table<string, any>
 ---@field windows integer[]
 
----@return GLineComponentFactory
+---@return GLine.ComponentFactory
 function ComponentFactory:new()
   local component = setmetatable({}, ComponentFactory)
   return component
