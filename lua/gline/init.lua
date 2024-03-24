@@ -12,7 +12,7 @@ local lazy_require = function(path)
 end
 
 local ComponentFactory = lazy_require("gline.component_factory")
-local EntryFactory = lazy_require("gline.entry_factory")
+local TabFactory = lazy_require("gline.tab_factory")
 local Config = require("gline.config")
 local Colors = require("gline.colors")
 
@@ -46,10 +46,10 @@ M.tabline = function()
   local tabline_builder = ""
 
   local component_factory = ComponentFactory:new()
-  local entry_factory = EntryFactory:new(component_factory)
+  local tab_factory = TabFactory:new(component_factory)
 
   for _, tab in ipairs(get_tab_info()) do
-    tabline_builder = tabline_builder .. entry_factory:make(tab)
+    tabline_builder = tabline_builder .. tab_factory:make(tab)
   end
 
   return tabline_builder .. Colors.fill

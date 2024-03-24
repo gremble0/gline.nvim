@@ -2,10 +2,10 @@ local M = {}
 
 ---@class Gline.Config
 M.config = {
-  entry_width = 22, -- Width of each tab/entry in the tabline
+  entry_width = 24, -- Width of each tab/entry in the tabline
   name = {
     enabled = true,
-    max_len = 16, -- Max characters in name of active buffer for each tab
+    max_len = 16, -- Max characters in name of active buffer for each tab, will override entry_width if close to or greater than it.
   },
   modified = {
     enabled = true,
