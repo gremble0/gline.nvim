@@ -9,8 +9,8 @@ local M = {
   norm_sep = "%#TabLineSep#",
 
   -- should never error, every theme has TabLine hl groups
-  sel_bg = vim.api.nvim_get_hl(0, { name = "TabLineSel" }).bg,
-  norm_bg = vim.api.nvim_get_hl(0, { name = "TabLine" }).bg,
+  sel_bg = vim.api.nvim_get_hl(0, { name = "TabLineSel", link = false }).bg,
+  norm_bg = vim.api.nvim_get_hl(0, { name = "TabLine", link = false }).bg,
 }
 
 local is_hex_color = function(s)
@@ -26,7 +26,7 @@ local set_separator_highlights = function()
     )
   else
     -- Use foreground from configs highlight group, use background from theme's TabLineSel
-    local sep_sel_fg = vim.api.nvim_get_hl(0, { name = Config.separator.selected.color }).fg
+    local sep_sel_fg = vim.api.nvim_get_hl(0, { name = Config.separator.selected.color, link = false }).fg
     vim.api.nvim_set_hl(0, "TabLineSelSep", { fg = sep_sel_fg, bg = string.format("#%06x", M.sel_bg) })
   end
 
@@ -34,7 +34,7 @@ local set_separator_highlights = function()
     vim.api.nvim_set_hl(0, "TabLineSep", { fg = Config.separator.normal.color, bg = string.format("#%06x", M.norm_bg) })
   else
     -- Use foreground from configs highlight group, use background from theme's TabLine
-    local sep_norm_fg = vim.api.nvim_get_hl(0, { name = Config.separator.normal.color }).fg
+    local sep_norm_fg = vim.api.nvim_get_hl(0, { name = Config.separator.normal.color, link = false }).fg
     vim.api.nvim_set_hl(0, "TabLineSep", { fg = sep_norm_fg, bg = string.format("#%06x", M.norm_bg) })
   end
 end

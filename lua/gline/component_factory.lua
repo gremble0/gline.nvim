@@ -1,5 +1,6 @@
 local Config = require("gline.config")
 local Colors = require("gline.colors")
+-- local devicons = nil
 
 ---Use one of this class' methods to make a component to put in a tab entry
 ---@class GLine.ComponentFactory
@@ -64,7 +65,7 @@ end
 ---@param tab TabInfo
 ---@return string
 function ComponentFactory:modified(tab)
-  return vim.api.nvim_buf_get_option(tab.selected_buf, "modified") and Config.modified.icon or ""
+  return vim.api.nvim_buf_get_option(tab.selected_buf, "modified") and Config.modified.icon or " "
 end
 
 return ComponentFactory

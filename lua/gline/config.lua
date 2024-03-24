@@ -18,7 +18,7 @@ M.config = {
     enabled = true,
     selected = {
       icon = "▎",
-      color = "Statement", -- hex color(#000 | #000000) or highlight group. If its a highlight group only use its foreground
+      color = "Keyword", -- hex color(#000 | #000000) or highlight group. If its a highlight group only use its foreground
     },
     normal = {
       icon = "▏",

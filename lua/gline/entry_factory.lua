@@ -26,8 +26,8 @@ end
 local get_padding = function(s)
   local total_padding = Config.entry_width - rendered_width(s)
 
-  local left_padding = (" "):rep(math.floor(total_padding / 2))
-  local right_padding = (" "):rep(math.ceil(total_padding / 2))
+  local left_padding = string.rep(" ", math.floor(total_padding / 2))
+  local right_padding = string.rep(" ", math.ceil(total_padding / 2))
 
   return left_padding, right_padding
 end
@@ -41,15 +41,15 @@ function EntryFactory:new(component_factory)
 end
 
 ---@param tab TabInfo
----@return string
+---@return string string representation of a tab in the tabline
 function EntryFactory:make(tab)
   local separator = Config.separator.enabled and self.component_factory:separator(tab) or ""
   local ft_icon = Config.ft_icon.enabled and self.component_factory:ft_icon(tab) or ""
   local name = Config.name.enabled and self.component_factory:name(tab) or ""
   local modified = Config.modified.enabled and self.component_factory:modified(tab) or ""
 
-  local entry = separator .. ft_icon .. " " .. name .. " " .. modified
-  local left_padding, right_padding = get_padding(entry)
+  local components = { separator, ft_icon, name, modified }
+  local left_padding, right_padding = get_padding(table.concat(components)) -- TODO: iteratively increase width in Entry instead of this
 
   return (tab.is_selected and Colors.sel or Colors.norm)
     .. separator
