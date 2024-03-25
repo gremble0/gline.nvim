@@ -1,4 +1,4 @@
-local Config = require("gline.config")
+local config = require("gline.config")
 
 ---@class Gline.Colors
 local M = {
@@ -19,39 +19,42 @@ local is_hex_color = function(s)
   return s:match("^#%x%x%x$") ~= nil or s:match("^#%x%x%x%x%x%x$") ~= nil
 end
 
----Set the highlights for the separator component
+---Set the highlights for separator components
 local set_separator_highlights = function()
   -- We need to dynamically change the background color based on selected and non
   -- selected tabs, so the logic here is a bit convoluted, but we basically just
-  -- set the background color dynamically and get the foreground from the config
-  local separator = Config.separator
-
-  if is_hex_color(separator.selected.color) then
-    vim.api.nvim_set_hl(0, "TabLineSelSep", vim.tbl_deep_extend("force", M.sel_hl, { fg = separator.selected.color }))
-  else
-    local sep_sel_hl = vim.api.nvim_get_hl(0, { name = separator.selected.color, link = false })
-    -- sepsel_hl.fg can error if user gives invalid config, skill issue
-    vim.api.nvim_set_hl(0, "TabLineSelSep", vim.tbl_deep_extend("force", M.sel_hl, { fg = sep_sel_hl.fg }))
-  end
+  -- override the foreground colors of the tabline with the one specified in config
+  local separator = config.separator
+  local norm_fg, sel_fg
 
   if is_hex_color(separator.normal.color) then
-    vim.api.nvim_set_hl(0, "TabLineSep", vim.tbl_deep_extend("force", M.norm_hl, { fg = separator.normal.color }))
+    norm_fg = separator.normal.color
   else
     local sep_norm_hl = vim.api.nvim_get_hl(0, { name = separator.normal.color, link = false })
-    vim.api.nvim_set_hl(0, "TabLineSep", vim.tbl_deep_extend("force", M.norm_hl, { fg = sep_norm_hl.fg }))
+    norm_fg = sep_norm_hl.fg
   end
+
+  if is_hex_color(separator.selected.color) then
+    sel_fg = separator.selected.color
+  else
+    local sep_sel_hl = vim.api.nvim_get_hl(0, { name = separator.selected.color, link = false })
+    sel_fg = sep_sel_hl.fg
+  end
+
+  vim.api.nvim_set_hl(0, "TabLineSep", vim.tbl_deep_extend("force", M.norm_hl, { fg = norm_fg }))
+  vim.api.nvim_set_hl(0, "TabLineSelSep", vim.tbl_deep_extend("force", M.sel_hl, { fg = sel_fg }))
 end
 
 local set_ft_icon_highlights = function()
-  vim.api.nvim_set_hl(0, "TabLineIconFallbackSel", vim.tbl_deep_extend("force", M.sel_hl, { fg = "#6d8086" }))
   vim.api.nvim_set_hl(0, "TabLineIconFallback", vim.tbl_deep_extend("force", M.norm_hl, { fg = "#6d8086" }))
+  vim.api.nvim_set_hl(0, "TabLineIconFallbackSel", vim.tbl_deep_extend("force", M.sel_hl, { fg = "#6d8086" }))
 end
 
 M.set_highlights = function()
-  if Config.separator.enabled then
+  if config.separator.enabled then
     set_separator_highlights()
   end
-  if Config.ft_icon.enabled then
+  if config.ft_icon.enabled then
     set_ft_icon_highlights()
   end
 end
