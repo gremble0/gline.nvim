@@ -13,7 +13,7 @@ function ComponentFactory:new()
   return component
 end
 
----@param tab TabInfo
+---@param tab Gline.TabInfo
 ---@return string
 function ComponentFactory:separator(tab)
   local selected = config.separator.selected
@@ -22,11 +22,11 @@ function ComponentFactory:separator(tab)
   return tab.is_selected and (colors.sel_sep .. selected.icon) or (colors.norm_sep .. normal.icon)
 end
 
----@param tab TabInfo
+---@param tab Gline.TabInfo
 ---@return string
 function ComponentFactory:ft_icon(tab)
   local selected_buf_ft = vim.api.nvim_buf_get_option(tab.selected_buf, "ft")
-  local icon_bg = tab.is_selected and colors.sel_bg or colors.norm_bg
+  local icon_hl = tab.is_selected and colors.sel_hl or colors.norm_hl
 
   -- Try to load devicons, use fallback if fails, else cache it
   if devicons == nil then
@@ -39,16 +39,17 @@ function ComponentFactory:ft_icon(tab)
   end
 
   local icon, icon_color = devicons.get_icon_color_by_filetype(selected_buf_ft, { default = true })
-  local icon_hl = "TabLineIcon" .. selected_buf_ft .. (tab.is_selected and "Sel" or "")
+  local icon_hl_name = "TabLineIcon" .. selected_buf_ft .. (tab.is_selected and "Sel" or "")
 
-  if vim.fn.hlexists(icon_hl) == 0 then
-    vim.api.nvim_set_hl(0, icon_hl, { fg = icon_color, bg = icon_bg })
+  -- If we are making a tab for a filetype we haven't set before, set it now
+  if vim.fn.hlexists(icon_hl_name) == 0 then
+    vim.api.nvim_set_hl(0, icon_hl_name, vim.tbl_deep_extend("force", icon_hl, { fg = icon_color }))
   end
 
-  return "%#" .. icon_hl .. "#" .. icon
+  return "%#" .. icon_hl_name .. "#" .. icon
 end
 
----@param tab TabInfo
+---@param tab Gline.TabInfo
 ---@return string
 function ComponentFactory:name(tab)
   local selected_buf_name = vim.fn.bufname(tab.selected_buf)
@@ -61,7 +62,7 @@ function ComponentFactory:name(tab)
   return (tab.is_selected and colors.sel or colors.norm) .. name
 end
 
----@param tab TabInfo
+---@param tab Gline.TabInfo
 ---@return string
 function ComponentFactory:modified(tab)
   return vim.api.nvim_buf_get_option(tab.selected_buf, "modified") and config.modified.icon or " "
