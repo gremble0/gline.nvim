@@ -62,7 +62,7 @@ function TabFactory:make(tab)
   if Config.separator.enabled then
     table.insert(components, 2, left_padding)
   else
-    table.insert(components, 1, left_padding)
+    table.insert(components, 1, left_padding .. " ") -- Another space to replace the separator icon
   end
   table.insert(components, right_padding)
 
