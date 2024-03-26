@@ -36,12 +36,16 @@ M.config = {
     },
     -- Comes after left padding before right padding
     center = {
-      { components.FtIconFactory, {} },
-      { components.BufNameFactory, {} },
+      {
+        components.FtIconFactory,
+        { --TODO: hijack_tab_highlight?, hard maybe not
+        },
+      },
+      { components.BufNameFactory, { max_len = 14 } },
     },
     -- Comes after right padding
     right = {
-      { components.ModifiedFactory, {} },
+      { components.ModifiedFactory, { icon = "●" } },
     },
   },
 }

@@ -12,7 +12,7 @@ local add_factories = function(section, factories)
   for _, section_item in ipairs(section) do
     local component_factory = section_item[1]
     local opts = section_item[2]
-    table.insert(factories, component_factory:new(opts))
+    table.insert(factories, component_factory:init(opts))
   end
 end
 
@@ -53,13 +53,13 @@ function M.make(tab)
   local components = {}
   -- TODO: nested loop
   for _, factory in ipairs(M.left_factories) do
-    table.insert(components, factory:generate(tab))
+    table.insert(components, factory:make(tab))
   end
   for _, factory in ipairs(M.center_factories) do
-    table.insert(components, factory:generate(tab))
+    table.insert(components, factory:make(tab))
   end
   for _, factory in ipairs(M.right_factories) do
-    table.insert(components, factory:generate(tab))
+    table.insert(components, factory:make(tab))
   end
 
   local left_padding, right_padding = get_padding(table.concat(components, " "))
@@ -68,8 +68,6 @@ function M.make(tab)
   table.insert(components, #config.config.sections.left + #config.config.sections.center + 2, right_padding)
   table.insert(components, #config.config.sections.left + 1, " ") -- One extra space of left padding
   table.insert(components, " ") -- One extra space of right padding
-
-  print(vim.inspect(components), #config.config.sections.left, #config.config.sections.center)
 
   return (tab.is_selected and "%#TabLineSel#" or "%#TabLine#") .. table.concat(components, " ")
 end

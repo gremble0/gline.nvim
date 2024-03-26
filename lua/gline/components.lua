@@ -3,11 +3,9 @@ local colors = require("gline.colors")
 ---@type table<string, Gline.ComponentFactory>
 local M = {}
 
----TODO: M -> Component
-
 ---@class Gline.ComponentFactory
 ---@field init fun(self: Gline.ComponentFactory, opts?: table): Gline.ComponentFactory constructor method that initializes the factory
----@field make fun(self: Gline.ComponentFactory, tab_info: Gline.TabInfo): string makes this components string given some tabinfo
+---@field make fun(self: Gline.ComponentFactory, tab: Gline.TabInfo): string makes this components string given some tabinfo
 ---@field opts table<string, any>
 
 ---@class Gline.Component.SeparatorFactory : Gline.ComponentFactory
@@ -57,17 +55,34 @@ function M.SeparatorFactory:make(tab)
 end
 
 ---@class Gline.Component.FtIconFactory : Gline.ComponentFactory
+---@field devicons table
 M.FtIconFactory = {}
 M.FtIconFactory.__index = M.FtIconFactory
 
-function M.FtIconFactory:init(opts)
+function M.FtIconFactory:init(_)
   local ft_icon_factory = setmetatable({}, M.FtIconFactory)
-  ft_icon_factory.opts = opts or {}
+  local ok, devicons = pcall(require, "nvim-web-devicons")
+  if not ok then
+    error("ft_icon component requires nvim-web-devicons installed")
+  end
+  ft_icon_factory.devicons = devicons
+
   return ft_icon_factory
 end
 
-function M.FtIconFactory:make()
-  return "#"
+function M.FtIconFactory:make(tab)
+  local selected_buf_ft = vim.api.nvim_buf_get_option(tab.selected_buf, "ft")
+  local icon_hl = tab.is_selected and colors.sel_hl or colors.norm_hl
+
+  local icon, icon_color = self.devicons.get_icon_color_by_filetype(selected_buf_ft, { default = true })
+  local icon_hl_name = "TabLineIcon" .. selected_buf_ft .. (tab.is_selected and "Sel" or "")
+
+  -- If we are making a tab for a filetype we haven't set before, set it now
+  if vim.fn.hlexists(icon_hl_name) == 0 then
+    vim.api.nvim_set_hl(0, icon_hl_name, vim.tbl_deep_extend("force", icon_hl, { fg = icon_color }))
+  end
+
+  return "%#" .. icon_hl_name .. "#" .. icon
 end
 
 ---@class Gline.Component.BufNameFactory : Gline.ComponentFactory
@@ -81,7 +96,14 @@ function M.BufNameFactory:init(opts)
 end
 
 function M.BufNameFactory:make(tab)
-  return "name"
+  local selected_buf_name = vim.fn.bufname(tab.selected_buf)
+  local name = selected_buf_name == "" and "[No Name]" or vim.fn.fnamemodify(selected_buf_name, ":t")
+
+  if #name > self.opts.max_len then
+    name = name:sub(1, self.opts.max_len) .. "…"
+  end
+
+  return (tab.is_selected and colors.sel or colors.norm) .. name
 end
 
 ---@class Gline.Component.ModifiedFactory : Gline.ComponentFactory
@@ -95,7 +117,8 @@ function M.ModifiedFactory:init(opts)
 end
 
 function M.ModifiedFactory:make(tab)
-  return "+"
+  return vim.api.nvim_buf_get_option(tab.selected_buf, "modified") and self.opts.icon
+    or string.rep(" ", vim.fn.strchars(self.opts.icon))
 end
 
 return M
