@@ -1,6 +1,5 @@
 local tab_factory = require("gline.tab_factory")
 local config = require("gline.config")
-local colors = require("gline.colors")
 
 local M = {}
 
@@ -36,24 +35,13 @@ M.tabline = function()
     tabline_builder = tabline_builder .. tab_factory.make(tab)
   end
 
-  return tabline_builder .. colors.fill
+  return tabline_builder .. "%#TabLineFill#"
 end
 
 ---@param conf Gline.Config?
 M.setup = function(conf)
   config.merge_config(conf)
-
-  print(vim.inspect(config.config.sections))
-  for _, section in ipairs(config.config.sections) do
-    for _, section_item in ipairs(section) do
-      local component_factory = section_item[1]
-      local opts = section_item[2]
-
-      table.insert(tab_factory.component_factories, component_factory:new(opts))
-    end
-  end
-
-  print(vim.inspect(tab_factory.component_factories))
+  tab_factory.init_factories()
 
   vim.o.tabline = "%!v:lua.require('gline').tabline()"
 end

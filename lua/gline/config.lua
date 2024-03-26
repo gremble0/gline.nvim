@@ -20,16 +20,29 @@ M.config = {
   sections = {
     -- Comes before left padding
     left = {
-      { components.SeparatorFactory, {} },
+      {
+        components.SeparatorFactory,
+        {
+          normal = {
+            color = "VertSplit",
+            icon = "▏",
+          },
+          selected = {
+            color = "Keyword",
+            icon = "▎",
+          },
+        },
+      },
     },
     -- Comes after left padding before right padding
     center = {
       { components.FtIconFactory, {} },
       { components.BufNameFactory, {} },
-      { components.ModifiedFactory, {} },
     },
     -- Comes after right padding
-    right = {},
+    right = {
+      { components.ModifiedFactory, {} },
+    },
   },
 }
 
