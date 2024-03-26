@@ -4,9 +4,8 @@ local colors = require("gline.colors")
 ---Used to make complete tab entries in the tabline. :make(tab) will return a string
 ---for that tabs information based on the users config
 ---@class Gline.TabFactory
----@field component_factory GLine.ComponentFactory
-local TabFactory = {}
-TabFactory.__index = TabFactory
+---@field component_factories Gline.ComponentFactory[]
+local M = { component_factories = {} }
 
 ---@param s string
 ---@return integer
@@ -21,6 +20,7 @@ local rendered_width = function(s)
   return len_iter
 end
 
+---TODO make method
 ---@param s string
 ---@return string left_padding, string right_padding
 local get_padding = function(s)
@@ -32,41 +32,20 @@ local get_padding = function(s)
   return left_padding, right_padding
 end
 
----@param component_factory GLine.ComponentFactory
----@return Gline.TabFactory
-function TabFactory:new(component_factory)
-  local entry = setmetatable({}, TabFactory)
-  entry.component_factory = component_factory
-  return entry
-end
-
 ---@param tab Gline.TabInfo
 ---@return string string representation of a tab entry in the tabline
-function TabFactory:make(tab)
+function M.make(tab)
   local components = {}
-  if config.separator.enabled then
-    table.insert(components, self.component_factory:separator(tab))
-  end
-  if config.ft_icon.enabled then
-    table.insert(components, self.component_factory:ft_icon(tab))
-  end
-  if config.name.enabled then
-    table.insert(components, self.component_factory:name(tab))
-  end
-  if config.modified.enabled then
-    table.insert(components, self.component_factory:modified(tab))
+  for _, component_factory in ipairs(M.component_factories) do
+    table.insert(components, component_factory:generate(tab))
   end
 
-  local left_padding, right_padding = get_padding(table.concat(components, " ")) -- TODO: iteratively increase width in Entry instead of get_padding
+  local left_padding, right_padding = get_padding(table.concat(components, " "))
 
-  if config.separator.enabled then
-    table.insert(components, 2, left_padding)
-  else
-    table.insert(components, 1, left_padding .. " ") -- Another space to replace the separator icon
-  end
-  table.insert(components, right_padding)
+  table.insert(components, #config.config.sections.left, left_padding)
+  table.insert(components, #config.config.sections.left + #config.config.sections.right, right_padding)
 
   return (tab.is_selected and colors.sel or colors.norm) .. table.concat(components, " ")
 end
 
-return TabFactory
+return M

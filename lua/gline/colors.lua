@@ -46,6 +46,7 @@ local set_separator_highlights = function()
 end
 
 local set_ft_icon_highlights = function()
+  -- Set highlights for fallback icons
   vim.api.nvim_set_hl(0, "TabLineIconFallback", vim.tbl_deep_extend("force", M.norm_hl, { fg = "#6d8086" }))
   vim.api.nvim_set_hl(0, "TabLineIconFallbackSel", vim.tbl_deep_extend("force", M.sel_hl, { fg = "#6d8086" }))
 end

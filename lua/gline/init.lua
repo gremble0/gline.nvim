@@ -1,18 +1,4 @@
----@param path string
----@return table
-local lazy_require = function(path)
-  return setmetatable({}, {
-    __index = function(_, key)
-      return require(path)[key]
-    end,
-    __newindex = function(_, key, value)
-      require(path)[key] = value
-    end,
-  })
-end
-
-local ComponentFactory = lazy_require("gline.component_factory")
-local TabFactory = lazy_require("gline.tab_factory")
+local tab_factory = require("gline.tab_factory")
 local config = require("gline.config")
 local colors = require("gline.colors")
 
@@ -46,11 +32,8 @@ end
 M.tabline = function()
   local tabline_builder = ""
 
-  local component_factory = ComponentFactory:new()
-  local tab_factory = TabFactory:new(component_factory)
-
   for _, tab in ipairs(get_tab_info()) do
-    tabline_builder = tabline_builder .. tab_factory:make(tab)
+    tabline_builder = tabline_builder .. tab_factory.make(tab)
   end
 
   return tabline_builder .. colors.fill
@@ -59,7 +42,18 @@ end
 ---@param conf Gline.Config?
 M.setup = function(conf)
   config.merge_config(conf)
-  colors.set_highlights()
+
+  print(vim.inspect(config.config.sections))
+  for _, section in ipairs(config.config.sections) do
+    for _, section_item in ipairs(section) do
+      local component_factory = section_item[1]
+      local opts = section_item[2]
+
+      table.insert(tab_factory.component_factories, component_factory:new(opts))
+    end
+  end
+
+  print(vim.inspect(tab_factory.component_factories))
 
   vim.o.tabline = "%!v:lua.require('gline').tabline()"
 end

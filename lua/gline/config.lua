@@ -1,29 +1,35 @@
+local components = require("gline.components")
+
 local M = {}
 
+---@class Gline.Config.SectionItem: table<number, Gline.ComponentFactory | table<string, any>>
+
+---@class Gline.Config.Sections
+---@field left Gline.Config.SectionItem[]
+---@field center Gline.Config.SectionItem[]
+---@field right Gline.Config.SectionItem[]
+
 ---@class Gline.Config
+---@field entry_width integer
+---@field sections Gline.Config.Sections
+
+---@type Gline.Config
 M.config = {
   entry_width = 22, -- Width of each tab/entry in the tabline
-  name = {
-    enabled = true,
-    max_len = 14, -- Max characters in name of active buffer for each tab, will override entry_width if close to or greater than it.
-  },
-  modified = {
-    enabled = true,
-    icon = "●",
-  },
-  ft_icon = {
-    enabled = true, -- if you have web-devicons but want it disabled for this plugin, set to false
-  },
-  separator = {
-    enabled = true,
-    selected = {
-      icon = "▎",
-      color = "Keyword", -- hex color(#000 | #000000) or highlight group. If its a highlight group only use its foreground
+
+  sections = {
+    -- Comes before left padding
+    left = {
+      { components.SeparatorFactory, {} },
     },
-    normal = {
-      icon = "▏",
-      color = "VertSplit", -- hex color(#000 | #000000) or highlight group. If its a highlight group only use its foreground
+    -- Comes after left padding before right padding
+    center = {
+      { components.FtIconFactory, {} },
+      { components.BufNameFactory, {} },
+      { components.ModifiedFactory, {} },
     },
+    -- Comes after right padding
+    right = {},
   },
 }
 
