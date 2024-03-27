@@ -2,24 +2,24 @@ local config = require("gline.config")
 
 ---Used to make complete tab entries in the tabline. :make(tab) will return a string
 ---for that tabs information based on the users config
----@class Gline.TabFactory
----@field left_factories Gline.ComponentFactory[]
----@field center_factories Gline.ComponentFactory[]
----@field right_factories Gline.ComponentFactory[]
-local M = { left_factories = {}, center_factories = {}, right_factories = {} }
+---@class Gline.TabLine
+---@field left_components Gline.Component[]
+---@field center_components Gline.Component[]
+---@field right_components Gline.Component[]
+local M = { left_components = {}, center_components = {}, right_components = {} }
 
-local add_factories = function(section, factories)
+local add_components = function(section, components)
   for _, section_item in ipairs(section) do
-    local component_factory = section_item[1]
+    local component = section_item[1]
     local opts = section_item[2]
-    table.insert(factories, component_factory:init(opts))
+    table.insert(components, component:init(opts))
   end
 end
 
-function M.init_factories()
-  add_factories(config.config.sections.left, M.left_factories)
-  add_factories(config.config.sections.center, M.center_factories)
-  add_factories(config.config.sections.right, M.right_factories)
+function M.init_components()
+  add_components(config.config.sections.left, M.left_components)
+  add_components(config.config.sections.center, M.center_components)
+  add_components(config.config.sections.right, M.right_components)
 end
 
 ---@param s string
@@ -40,6 +40,9 @@ end
 ---@return string left_padding, string right_padding
 local get_padding = function(s)
   local total_padding = config.entry_width - rendered_width(s)
+  -- - #config.config.sections.left
+  -- - #config.config.sections.center
+  -- - #config.config.sections.right
 
   local left_padding = string.rep(" ", math.floor(total_padding / 2))
   local right_padding = string.rep(" ", math.ceil(total_padding / 2))
@@ -52,22 +55,26 @@ end
 function M.make(tab)
   local components = {}
   -- TODO: nested loop
-  for _, factory in ipairs(M.left_factories) do
+  for _, factory in ipairs(M.left_components) do
     table.insert(components, factory:make(tab))
   end
-  for _, factory in ipairs(M.center_factories) do
+  for _, factory in ipairs(M.center_components) do
     table.insert(components, factory:make(tab))
   end
-  for _, factory in ipairs(M.right_factories) do
+  for _, factory in ipairs(M.right_components) do
     table.insert(components, factory:make(tab))
   end
 
-  local left_padding, right_padding = get_padding(table.concat(components, " "))
+  -- table.insert(components, #config.config.sections.left + 1, " ") -- One extra space of left padding
+  -- table.insert(components, " ") -- One extra space of right padding
+
+  local tabline = table.concat(components, " ")
+  local left_padding, right_padding = get_padding(tabline)
 
   table.insert(components, #config.config.sections.left + 1, left_padding)
   table.insert(components, #config.config.sections.left + #config.config.sections.center + 2, right_padding)
-  table.insert(components, #config.config.sections.left + 1, " ") -- One extra space of left padding
-  table.insert(components, " ") -- One extra space of right padding
+
+  print(vim.inspect(components))
 
   return (tab.is_selected and "%#TabLineSel#" or "%#TabLine#") .. table.concat(components, " ")
 end

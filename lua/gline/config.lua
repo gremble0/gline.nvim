@@ -10,9 +10,10 @@ local M = {}
 ---@field right Gline.Config.SectionItem[]
 
 ---@class Gline.Config
----@field entry_width integer
----@field sections Gline.Config.Sections
+---@field entry_width? integer
+---@field sections? Gline.Config.Sections
 
+---The active config used for gline, can be modified by the user through the setup function
 ---@type Gline.Config
 M.config = {
   entry_width = 22, -- Width of each tab/entry in the tabline
@@ -21,7 +22,7 @@ M.config = {
     -- Comes before left padding
     left = {
       {
-        components.SeparatorFactory,
+        components.Separator,
         {
           normal = {
             color = "VertSplit",
@@ -36,16 +37,12 @@ M.config = {
     },
     -- Comes after left padding before right padding
     center = {
-      {
-        components.FtIconFactory,
-        { --TODO: hijack_tab_highlight?, hard maybe not
-        },
-      },
-      { components.BufNameFactory, { max_len = 14 } },
+      { components.FtIcon, {} },
+      { components.BufName, { max_len = 14 } },
     },
     -- Comes after right padding
     right = {
-      { components.ModifiedFactory, { icon = "●" } },
+      { components.Modified, { icon = "●" } },
     },
   },
 }

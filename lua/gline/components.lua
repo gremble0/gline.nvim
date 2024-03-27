@@ -1,25 +1,26 @@
 local colors = require("gline.colors")
 
----@type table<string, Gline.ComponentFactory>
-local M = {}
-
----@class Gline.ComponentFactory
----@field init fun(self: Gline.ComponentFactory, opts?: table): Gline.ComponentFactory constructor method that initializes the factory
----@field make fun(self: Gline.ComponentFactory, tab: Gline.TabInfo): string makes this components string given some tabinfo
+---@class Gline.Component
+---@field init fun(self: Gline.Component, opts?: table): Gline.Component constructor method that initializes the factory
+---@field make fun(self: Gline.Component, tab: Gline.TabInfo): string makes this components string given some tabinfo
 ---@field opts table<string, any>
 
----@class Gline.Component.SeparatorFactory : Gline.ComponentFactory
-M.SeparatorFactory = {}
-M.SeparatorFactory.__index = M.SeparatorFactory
+---A table of components that gline uses by default
+---@class Gline.DefaultComponents
+local M = {}
 
----Check if a string is a hex color
+---@class Gline.Component.Separator : Gline.Component
+M.Separator = {}
+M.Separator.__index = M.Separator
+
+---Check if a string is a hex color (#000 | #000000)
 ---@return boolean
 local is_hex_color = function(s)
   return s:match("^#%x%x%x$") ~= nil or s:match("^#%x%x%x%x%x%x$") ~= nil
 end
 
 ---Set the highlights for separator components
-function M.SeparatorFactory:set_highlights()
+function M.Separator:set_highlights()
   -- We need to dynamically change the background color based on selected and non
   -- selected tabs, so the logic here is a bit convoluted, but we basically just
   -- override the foreground colors of the tabline with the one specified in config
@@ -43,34 +44,35 @@ function M.SeparatorFactory:set_highlights()
   vim.api.nvim_set_hl(0, "TabLineSelSep", vim.tbl_deep_extend("force", colors.sel_hl, { fg = sel_fg }))
 end
 
-function M.SeparatorFactory:init(opts)
-  local separator_factory = setmetatable({}, M.SeparatorFactory)
-  separator_factory.opts = opts or {}
-  separator_factory:set_highlights()
-  return separator_factory
+function M.Separator:init(opts)
+  local separator = setmetatable({}, M.Separator)
+  separator.opts = opts or {}
+  separator:set_highlights()
+
+  return separator
 end
 
-function M.SeparatorFactory:make(tab)
+function M.Separator:make(tab)
   return tab.is_selected and colors.sel_sep .. self.opts.selected.icon or colors.norm_sep .. self.opts.normal.icon
 end
 
----@class Gline.Component.FtIconFactory : Gline.ComponentFactory
+---@class Gline.Component.FtIcon : Gline.Component
 ---@field devicons table
-M.FtIconFactory = {}
-M.FtIconFactory.__index = M.FtIconFactory
+M.FtIcon = {}
+M.FtIcon.__index = M.FtIcon
 
-function M.FtIconFactory:init(_)
-  local ft_icon_factory = setmetatable({}, M.FtIconFactory)
+function M.FtIcon:init(_)
+  local ft_icon = setmetatable({}, M.FtIcon)
   local ok, devicons = pcall(require, "nvim-web-devicons")
   if not ok then
     error("ft_icon component requires nvim-web-devicons installed")
   end
-  ft_icon_factory.devicons = devicons
+  ft_icon.devicons = devicons
 
-  return ft_icon_factory
+  return ft_icon
 end
 
-function M.FtIconFactory:make(tab)
+function M.FtIcon:make(tab)
   local selected_buf_ft = vim.api.nvim_buf_get_option(tab.selected_buf, "ft")
   local icon_hl = tab.is_selected and colors.sel_hl or colors.norm_hl
 
@@ -85,17 +87,18 @@ function M.FtIconFactory:make(tab)
   return "%#" .. icon_hl_name .. "#" .. icon
 end
 
----@class Gline.Component.BufNameFactory : Gline.ComponentFactory
-M.BufNameFactory = {}
-M.BufNameFactory.__index = M.BufNameFactory
+---@class Gline.Component.BufName : Gline.Component
+M.BufName = {}
+M.BufName.__index = M.BufName
 
-function M.BufNameFactory:init(opts)
-  local buf_name_factory = setmetatable({}, { __index = M.BufNameFactory })
-  buf_name_factory.opts = opts or {}
-  return buf_name_factory
+function M.BufName:init(opts)
+  local buf_name = setmetatable({}, { __index = M.BufName })
+  buf_name.opts = opts or {}
+
+  return buf_name
 end
 
-function M.BufNameFactory:make(tab)
+function M.BufName:make(tab)
   local selected_buf_name = vim.fn.bufname(tab.selected_buf)
   local name = selected_buf_name == "" and "[No Name]" or vim.fn.fnamemodify(selected_buf_name, ":t")
 
@@ -106,17 +109,18 @@ function M.BufNameFactory:make(tab)
   return (tab.is_selected and colors.sel or colors.norm) .. name
 end
 
----@class Gline.Component.ModifiedFactory : Gline.ComponentFactory
-M.ModifiedFactory = {}
-M.ModifiedFactory.__index = M.ModifiedFactory
+---@class Gline.Component.Modified : Gline.Component
+M.Modified = {}
+M.Modified.__index = M.Modified
 
-function M.ModifiedFactory:init(opts)
-  local modified_factory = setmetatable({}, { __index = M.ModifiedFactory })
-  modified_factory.opts = opts or {}
-  return modified_factory
+function M.Modified:init(opts)
+  local modified = setmetatable({}, { __index = M.Modified })
+  modified.opts = opts or {}
+
+  return modified
 end
 
-function M.ModifiedFactory:make(tab)
+function M.Modified:make(tab)
   return vim.api.nvim_buf_get_option(tab.selected_buf, "modified") and self.opts.icon
     or string.rep(" ", vim.fn.strchars(self.opts.icon))
 end

@@ -1,4 +1,4 @@
-local tab_factory = require("gline.tab_factory")
+local tabline = require("gline.tabline")
 local config = require("gline.config")
 
 local M = {}
@@ -32,7 +32,7 @@ M.tabline = function()
   local tabline_builder = ""
 
   for _, tab in ipairs(get_tab_info()) do
-    tabline_builder = tabline_builder .. tab_factory.make(tab)
+    tabline_builder = tabline_builder .. tabline.make(tab)
   end
 
   return tabline_builder .. "%#TabLineFill#"
@@ -41,7 +41,7 @@ end
 ---@param conf Gline.Config?
 M.setup = function(conf)
   config.merge_config(conf)
-  tab_factory.init_factories()
+  tabline.init_components()
 
   vim.o.tabline = "%!v:lua.require('gline').tabline()"
 end
