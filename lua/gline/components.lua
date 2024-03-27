@@ -1,5 +1,3 @@
-local colors = require("gline.colors")
-
 ---@class Gline.Component
 ---@field init fun(self: Gline.Component, opts?: table): Gline.Component constructor method that initializes the factory
 ---@field make fun(self: Gline.Component, tab: Gline.TabInfo): string makes this components string given some tabinfo
@@ -10,6 +8,8 @@ local colors = require("gline.colors")
 local M = {}
 
 ---@class Gline.Component.Separator : Gline.Component
+---@field norm_hl string
+---@field sel_hl string
 M.Separator = {}
 M.Separator.__index = M.Separator
 
@@ -41,20 +41,30 @@ function M.Separator:set_highlights()
     sel_fg = sep_sel_hl.fg
   end
 
-  vim.api.nvim_set_hl(0, "TabLineSep", vim.tbl_deep_extend("force", colors.norm_hl, { fg = norm_fg }))
-  vim.api.nvim_set_hl(0, "TabLineSelSep", vim.tbl_deep_extend("force", colors.sel_hl, { fg = sel_fg }))
+  vim.api.nvim_set_hl(
+    0,
+    "TabLineSep",
+    vim.tbl_deep_extend("force", vim.api.nvim_get_hl(0, { name = "TabLine", link = false }), { fg = norm_fg })
+  )
+  vim.api.nvim_set_hl(
+    0,
+    "TabLineSelSep",
+    vim.tbl_deep_extend("force", vim.api.nvim_get_hl(0, { name = "TabLineSel", link = false }), { fg = sel_fg })
+  )
 end
 
 function M.Separator:init(opts)
   local separator = setmetatable({}, M.Separator)
   separator.opts = opts or {}
+  separator.norm_hl = "%#TabLineSep#"
+  separator.sel_hl = "%#TabLineSelSep#"
   separator:set_highlights()
 
   return separator
 end
 
 function M.Separator:make(tab)
-  return tab.is_selected and colors.sel_sep .. self.opts.selected.icon or colors.norm_sep .. self.opts.normal.icon
+  return tab.is_selected and self.sel_hl .. self.opts.selected.icon or self.norm_hl .. self.opts.normal.icon
 end
 
 ---@class Gline.Component.FtIcon : Gline.Component
@@ -66,7 +76,7 @@ function M.FtIcon:init(_)
   local ft_icon = setmetatable({}, M.FtIcon)
   local success, devicons = pcall(require, "nvim-web-devicons")
   if not success then
-    error("Gline's filetype component requires having nvim-web-devicons installed")
+    error("gline's filetype component requires having nvim-web-devicons installed")
   end
   ft_icon.devicons = devicons
 
@@ -75,7 +85,8 @@ end
 
 function M.FtIcon:make(tab)
   local selected_buf_ft = vim.api.nvim_buf_get_option(tab.selected_buf, "ft")
-  local icon_hl = tab.is_selected and colors.sel_hl or colors.norm_hl
+  local icon_hl = tab.is_selected and vim.api.nvim_get_hl(0, { name = "TabLineSel", link = false })
+    or vim.api.nvim_get_hl(0, { name = "TabLine", link = false })
 
   local icon, icon_color = self.devicons.get_icon_color_by_filetype(selected_buf_ft, { default = true })
   local icon_hl_name = "TabLineIcon" .. selected_buf_ft .. (tab.is_selected and "Sel" or "")
@@ -89,12 +100,16 @@ function M.FtIcon:make(tab)
 end
 
 ---@class Gline.Component.BufName : Gline.Component
+---@field norm_hl string
+---@field sel_hl string
 M.BufName = {}
 M.BufName.__index = M.BufName
 
 function M.BufName:init(opts)
   local buf_name = setmetatable({}, { __index = M.BufName })
   buf_name.opts = opts or {}
+  buf_name.norm_hl = "%#TabLine#"
+  buf_name.sel_hl = "%#TabLineSel#"
 
   return buf_name
 end
@@ -107,7 +122,7 @@ function M.BufName:make(tab)
     name = name:sub(1, self.opts.max_len) .. "…"
   end
 
-  return (tab.is_selected and colors.sel or colors.norm) .. name
+  return (tab.is_selected and self.sel_hl or self.norm_hl) .. name
 end
 
 ---@class Gline.Component.Modified : Gline.Component
