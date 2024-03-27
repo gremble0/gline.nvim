@@ -21,8 +21,12 @@ local get_tab_info = function()
     tab_info.is_selected = tab_info.tabnr == vim.fn.tabpagenr()
 
     local buflist = vim.fn.tabpagebuflist(tab_info.tabnr)
-    local winnr = vim.fn.tabpagewinnr(tab_info.tabnr)
-    tab_info.selected_buf = type(buflist) == "number" and buflist or buflist[winnr]
+    if type(buflist) == "number" then
+      tab_info.selected_buf = buflist
+    else
+      local winnr = vim.fn.tabpagewinnr(tab_info.tabnr)
+      tab_info.selected_buf = buflist[winnr]
+    end
   end
 
   return tab_infos

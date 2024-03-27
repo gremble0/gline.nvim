@@ -2,7 +2,10 @@ local components = require("gline.components")
 
 local M = {}
 
----@class Gline.Config.SectionItem: table<number, Gline.ComponentFactory | table<string, any>>
+---@class Gline.Config.SectionItem
+---@field [1] Gline.Component some component
+---@field [2]? table<string, any> any options passed to the components constructor
+---@see Gline.Component
 
 ---@class Gline.Config.Sections
 ---@field left Gline.Config.SectionItem[]
@@ -16,7 +19,7 @@ local M = {}
 ---The active config used for gline, can be modified by the user through the setup function
 ---@type Gline.Config
 M.config = {
-  entry_width = 22, -- Width of each tab/entry in the tabline
+  entry_width = 24, -- Width of each tab/entry in the tabline
 
   sections = {
     -- Comes before left padding
@@ -38,7 +41,7 @@ M.config = {
     -- Comes after left padding before right padding
     center = {
       { components.FtIcon, {} },
-      { components.BufName, { max_len = 14 } },
+      { components.BufName, { max_len = 16 } },
     },
     -- Comes after right padding
     right = {
@@ -47,6 +50,7 @@ M.config = {
   },
 }
 
+---Merge some config with the current config
 ---@param conf Gline.Config?
 M.merge_config = function(conf)
   if conf then
@@ -54,7 +58,7 @@ M.merge_config = function(conf)
   end
 end
 
--- So you can do require("gline.config").entry_width instead of require("gline.config").config.entry_width
+-- So you can do for example require("gline.config").entry_width instead of require("gline.config").config.entry_width
 setmetatable(M, {
   __index = function(_, key)
     return M.config[key]

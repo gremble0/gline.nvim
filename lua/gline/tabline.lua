@@ -17,9 +17,9 @@ local add_components = function(section, components)
 end
 
 function M.init_components()
-  add_components(config.config.sections.left, M.left_components)
-  add_components(config.config.sections.center, M.center_components)
-  add_components(config.config.sections.right, M.right_components)
+  add_components(config.sections.left, M.left_components)
+  add_components(config.sections.center, M.center_components)
+  add_components(config.sections.right, M.right_components)
 end
 
 ---@param s string
@@ -36,16 +36,20 @@ local rendered_width = function(s)
 end
 
 ---TODO make method
+---Get the padding around the center section
 ---@param s string
 ---@return string left_padding, string right_padding
-local get_padding = function(s)
-  local total_padding = config.entry_width - rendered_width(s)
-  -- - #config.config.sections.left
-  -- - #config.config.sections.center
-  -- - #config.config.sections.right
+local get_center_padding = function(s)
+  -- Subtract the length of the sections as this will be added as padding between
+  -- each component
+  local n_total_padding = config.entry_width
+    - rendered_width(s)
+    - #config.sections.left
+    - #config.sections.center
+    - #config.sections.right
 
-  local left_padding = string.rep(" ", math.floor(total_padding / 2))
-  local right_padding = string.rep(" ", math.ceil(total_padding / 2))
+  local left_padding = string.rep(" ", math.floor(n_total_padding / 2))
+  local right_padding = string.rep(" ", math.ceil(n_total_padding / 2))
 
   return left_padding, right_padding
 end
@@ -65,18 +69,15 @@ function M.make(tab)
     table.insert(components, factory:make(tab))
   end
 
-  -- table.insert(components, #config.config.sections.left + 1, " ") -- One extra space of left padding
-  -- table.insert(components, " ") -- One extra space of right padding
-
   local tabline = table.concat(components, " ")
-  local left_padding, right_padding = get_padding(tabline)
+  local left_padding, right_padding = get_center_padding(tabline)
 
-  table.insert(components, #config.config.sections.left + 1, left_padding)
-  table.insert(components, #config.config.sections.left + #config.config.sections.center + 2, right_padding)
+  table.insert(components, #config.sections.left + 1, left_padding)
+  table.insert(components, #config.sections.left + #config.sections.center + 2, right_padding)
+  table.insert(components, #config.config.sections.left + 1, "") -- One extra space of left padding
+  table.insert(components, "") -- One extra space of right padding
 
-  print(vim.inspect(components))
-
-  return (tab.is_selected and "%#TabLineSel#" or "%#TabLine#") .. table.concat(components, " ")
+  return table.concat(components, " ")
 end
 
 return M

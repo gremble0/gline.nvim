@@ -13,17 +13,18 @@ local M = {}
 M.Separator = {}
 M.Separator.__index = M.Separator
 
----Check if a string is a hex color (#000 | #000000)
+---Check if a string is a hex color. Vim highlights only accept 6 digit hex
+---colors like #000000, so #000 will return false
 ---@return boolean
 local is_hex_color = function(s)
-  return s:match("^#%x%x%x$") ~= nil or s:match("^#%x%x%x%x%x%x$") ~= nil
+  return s:match("^#%x%x%x%x%x%x$") ~= nil
 end
 
 ---Set the highlights for separator components
 function M.Separator:set_highlights()
   -- We need to dynamically change the background color based on selected and non
-  -- selected tabs, so the logic here is a bit convoluted, but we basically just
-  -- override the foreground colors of the tabline with the one specified in config
+  -- selected tabs. Therefore we set the separators colors by overriding the
+  -- tablines foreground colors with the active config.
   local norm_fg, sel_fg
 
   if is_hex_color(self.opts.normal.color) then
@@ -63,9 +64,9 @@ M.FtIcon.__index = M.FtIcon
 
 function M.FtIcon:init(_)
   local ft_icon = setmetatable({}, M.FtIcon)
-  local ok, devicons = pcall(require, "nvim-web-devicons")
-  if not ok then
-    error("ft_icon component requires nvim-web-devicons installed")
+  local success, devicons = pcall(require, "nvim-web-devicons")
+  if not success then
+    error("Gline's filetype component requires having nvim-web-devicons installed")
   end
   ft_icon.devicons = devicons
 
