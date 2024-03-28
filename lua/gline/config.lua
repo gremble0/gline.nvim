@@ -8,9 +8,9 @@ local M = {}
 ---@see Gline.Component
 
 ---@class Gline.Config.Sections
----@field left Gline.Config.SectionItem[]
----@field center Gline.Config.SectionItem[]
----@field right Gline.Config.SectionItem[]
+---@field left? Gline.Config.SectionItem[]
+---@field center? Gline.Config.SectionItem[]
+---@field right? Gline.Config.SectionItem[]
 
 ---@class Gline.Config
 ---@field entry_width? integer

@@ -95,7 +95,7 @@ local get_center_padding = function(s)
 end
 
 ---@param tab Gline.TabInfo
----@return string string representation of a tab entry in the tabline
+---@return string # string representation of a tab entry in the tabline
 function M.make_tab(tab)
   local components = {}
   -- TODO: nested loop

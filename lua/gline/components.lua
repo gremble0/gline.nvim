@@ -1,5 +1,6 @@
+---TODO: fix types for implementors of this interfaces functions
 ---@class Gline.Component
----@field init fun(self: Gline.Component, opts?: table): Gline.Component constructor method that initializes the factory
+---@field init fun(self: Gline.Component, opts?: table<string, any>): Gline.Component constructor method that initializes the factory
 ---@field make fun(self: Gline.Component, tab: Gline.TabInfo): string makes this components string given some tabinfo
 ---@field opts table<string, any>
 
