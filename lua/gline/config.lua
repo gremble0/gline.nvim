@@ -13,13 +13,14 @@ local M = {}
 ---@field right? Gline.Config.SectionItem[]
 
 ---@class Gline.Config
----@field entry_width? integer
+---@field min_entry_width? integer
 ---@field sections? Gline.Config.Sections
 
 ---The active config used for gline, can be modified by the user through the setup function
 ---@type Gline.Config
 M.config = {
-  entry_width = 24, -- Width of each tab/entry in the tabline
+  -- Width of each tab/entry in the tabline. Will be overridden if components are bigger than this
+  min_entry_width = 24,
 
   sections = {
     -- Comes before left padding
@@ -28,11 +29,11 @@ M.config = {
         components.Separator,
         {
           normal = {
-            color = "VertSplit",
+            color = "VertSplit", -- 6 digit hex color or highlight group
             icon = "▏",
           },
           selected = {
-            color = "Keyword",
+            color = "Keyword", -- 6 digit hex color or highlight group
             icon = "▎",
           },
         },

@@ -1,7 +1,93 @@
 # gline.nvim
-A modular lightweight tabline plugin for neovim, with a simple interface for adding custom components.
+(YET ANOTHER) modular lightweight tabline plugin for neovim, with a simple interface for adding custom components. This plugin has intentionally dropped features I find unnecessary like mouse support, animations, pinning, etc, to keep it minimal.
 
-## Adding your own components
+![gline preview](https://github.com/gremble0/gline.nvim/assets/45577341/a42681c9-7279-4ffa-b078-cdefd4013203)
+
+## Setup
+Use your favorite package manager to import the plugin. The plugin can easily be lazy loaded if your package manager allows it. Following is how to setup the plugin with the default configuration using lazy.nvim. The default components provided with the plugin will use the `TabLine` and `TabLineSel` highlight groups for most of its theming (see `:help nvim_set_hl()` if you want to override the colors from your current colorscheme)
+```lua
+{
+  "gremble0/gline.nvim",
+  -- nvim-web-devicons is required by default. If you don't want the file type icon
+  -- component you can remove the dependency and redefine the center section (see below)
+  dependencies = "nvim-tree/nvim-web-devicons",
+  -- Uncomment if you want to lazy load
+  -- event = "TabNew"
+  config = function()
+    local components = require("gline.components")
+
+    require("gline").setup({
+      -- Width of each tab/entry in the tabline. Will be overridden if components are bigger than this
+      min_entry_width = 24,
+
+      sections = {
+        -- Comes before left padding
+        left = {
+          {
+            components.Separator,
+            {
+              normal = {
+                color = "VertSplit", -- 6 digit hex color or highlight group
+                icon = "▏",
+              },
+              selected = {
+                color = "Keyword", -- 6 digit hex color or highlight group
+                icon = "▎",
+              },
+            },
+          },
+        },
+        -- Comes after left padding before right padding
+        center = {
+          { components.FtIcon, {} },
+          { components.BufName, { max_len = 16 } },
+        },
+        -- Comes after right padding
+        right = {
+          { components.Modified, { icon = "●" } },
+        },
+      },
+    })
+  end
+}
+```
+
+## Modifying components
+### Modifying default components
+To modify the default components you can change the options in the sectinos table. **NOTE:** any definition of a component in the setup function will require a fully defined option table. For example if you want to swap the placements of the `Modified` and `Separator` components you could do it like this:
+
+```lua
+local components = require("gline.components")
+
+require("gline").setup({
+  -- Width of each tab/entry in the tabline. Will be overridden if components are bigger than this
+  min_entry_width = 24,
+
+  sections = {
+    -- Comes before left padding
+    left = {
+      { components.Modified, { icon = "●" } },
+    },
+    -- `center` will have the same components if omitted from setup
+    right = {
+      {
+        components.Separator,
+        {
+          normal = {
+            color = "VertSplit", -- 6 digit hex color or highlight group
+            icon = "▏",
+          },
+          selected = {
+            color = "Keyword", -- 6 digit hex color or highlight group
+            icon = "▎",
+          },
+        },
+      },
+    },
+  },
+})
+```
+### Adding your own components
 To add your own components you need to define a component that implements the following interface:
 ```lua
 ---@class Gline.Component
@@ -21,6 +107,8 @@ Where `Gline.TabInfo` contains data commonly used within components. It is defin
 ```
 
 The `:init()` method should do things you want to only be executed once, when doing initial setup. This could be things like setting some internal state, parsing some options, setting highlights, etc. The `:make()` method will be called every time the tabline is redrawn where the string it returns is added into the tab.
+
+Here is a very simple example of how you can make a custom component and include it in your tabline
 ```lua
 ---@class Gline.Component.Example : Gline.Component
 local ExampleComponent = {}

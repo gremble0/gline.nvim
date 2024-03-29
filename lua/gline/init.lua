@@ -82,7 +82,7 @@ end
 local get_center_padding = function(s)
   -- Subtract the length of the sections as this will be added as padding between
   -- each component
-  local n_total_padding = config.entry_width
+  local n_total_padding = config.min_entry_width
     - rendered_width(s)
     - #config.sections.left
     - #config.sections.center
