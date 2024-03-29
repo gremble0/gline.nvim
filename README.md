@@ -1,7 +1,7 @@
 # gline.nvim
-(YET ANOTHER) modular lightweight tabline plugin for neovim, with a simple interface for adding custom components. This plugin has intentionally dropped features I find unnecessary like mouse support, animations, pinning, etc, to keep it minimal.
+(YET ANOTHER) modular lightweight tabline plugin for neovim, with a simple interface for adding custom components. This plugin has intentionally dropped features I find unnecessary like mouse support, animations, pinning, etc. to keep it minimal and fast.
 
-![gline preview](https://github.com/gremble0/gline.nvim/assets/45577341/a42681c9-7279-4ffa-b078-cdefd4013203)
+![gline preview](https://github.com/gremble0/gline.nvim/assets/45577341/73f7f507-3853-46a8-9328-ddf0c7b9e558)
 
 ## Setup
 Use your favorite package manager to import the plugin. The plugin can easily be lazy loaded if your package manager allows it. Following is how to setup the plugin with the default configuration using lazy.nvim. The default components provided with the plugin will use the `TabLine` and `TabLineSel` highlight groups for most of its theming (see `:help nvim_set_hl()` if you want to override the colors from your current colorscheme)
@@ -9,48 +9,55 @@ Use your favorite package manager to import the plugin. The plugin can easily be
 {
   "gremble0/gline.nvim",
   -- nvim-web-devicons is required by default. If you don't want the file type icon
-  -- component you can remove the dependency and redefine the center section (see below)
+  -- component you can remove the dependency and redefine the center section in the setup (see below)
   dependencies = "nvim-tree/nvim-web-devicons",
   -- Uncomment if you want to lazy load
   -- event = "TabNew"
   config = function()
-    local components = require("gline.components")
-
-    require("gline").setup({
-      -- Width of each tab/entry in the tabline. Will be overridden if components are bigger than this
-      min_entry_width = 24,
-
-      sections = {
-        -- Comes before left padding
-        left = {
-          {
-            components.Separator,
-            {
-              normal = {
-                color = "VertSplit", -- 6 digit hex color or highlight group
-                icon = "▏",
-              },
-              selected = {
-                color = "Keyword", -- 6 digit hex color or highlight group
-                icon = "▎",
-              },
-            },
-          },
-        },
-        -- Comes after left padding before right padding
-        center = {
-          { components.FtIcon, {} },
-          { components.BufName, { max_len = 16 } },
-        },
-        -- Comes after right padding
-        right = {
-          { components.Modified, { icon = "●" } },
-        },
-      },
-    })
+    require("gline").setup()
   end
 }
 ```
+
+<details>
+<summary>Show full default configuration</summary>
+<br>
+
+```lua
+require("gline").setup({
+  -- Width of each tab/entry in the tabline. Will be overridden if components are bigger than this
+  min_entry_width = 24,
+
+  sections = {
+    -- Comes before left padding
+    left = {
+      {
+        components.Separator,
+        {
+          normal = {
+            color = "VertSplit", -- 6 digit hex color or highlight group
+            icon = "▏",
+          },
+          selected = {
+            color = "Keyword", -- 6 digit hex color or highlight group
+            icon = "▎",
+          },
+        },
+      },
+    },
+    -- Comes after left padding before right padding
+    center = {
+      { components.FtIcon, {} }, -- Requires nvim-web-devicons
+      { components.BufName, { max_len = 16 } },
+    },
+    -- Comes after right padding
+    right = {
+      { components.Modified, { icon = "●" } },
+    },
+  },
+})
+```
+</details>
 
 ## Modifying components
 ### Modifying default components

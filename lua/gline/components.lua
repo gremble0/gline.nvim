@@ -127,19 +127,26 @@ function M.BufName:make(tab)
 end
 
 ---@class Gline.Component.Modified : Gline.Component
+---@field norm_hl string
+---@field sel_hl string
 M.Modified = {}
 M.Modified.__index = M.Modified
 
 function M.Modified:init(opts)
   local modified = setmetatable({}, { __index = M.Modified })
   modified.opts = opts or {}
+  modified.norm_hl = "%#TabLine#"
+  modified.sel_hl = "%#TabLineSel#"
 
   return modified
 end
 
 function M.Modified:make(tab)
-  return vim.api.nvim_buf_get_option(tab.selected_buf, "modified") and self.opts.icon
+  --TODO: hl
+  local icon = vim.api.nvim_buf_get_option(tab.selected_buf, "modified") and self.opts.icon
     or string.rep(" ", vim.fn.strchars(self.opts.icon))
+
+  return (tab.is_selected and self.sel_hl or self.norm_hl) .. icon
 end
 
 return M

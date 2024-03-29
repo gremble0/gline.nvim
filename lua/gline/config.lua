@@ -41,7 +41,7 @@ M.config = {
     },
     -- Comes after left padding before right padding
     center = {
-      { components.FtIcon, {} },
+      { components.FtIcon, {} }, -- Requires nvim-web-devicons
       { components.BufName, { max_len = 16 } },
     },
     -- Comes after right padding
