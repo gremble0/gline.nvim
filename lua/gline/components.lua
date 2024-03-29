@@ -73,8 +73,9 @@ end
 M.FtIcon = {}
 M.FtIcon.__index = M.FtIcon
 
-function M.FtIcon:init(_)
+function M.FtIcon:init(opts)
   local ft_icon = setmetatable({}, M.FtIcon)
+  ft_icon.opts = opts
   local success, devicons = pcall(require, "nvim-web-devicons")
   if not success then
     error("gline's filetype component requires having nvim-web-devicons installed")
@@ -90,7 +91,13 @@ function M.FtIcon:make(tab)
     or vim.api.nvim_get_hl(0, { name = "TabLine", link = false })
 
   local icon, icon_color = self.devicons.get_icon_color_by_filetype(selected_buf_ft, { default = true })
-  local icon_hl_name = "TabLineIcon" .. selected_buf_ft .. (tab.is_selected and "Sel" or "")
+
+  local icon_hl_name
+  if self.opts.colored then
+    icon_hl_name = "TabLineIcon" .. selected_buf_ft .. (tab.is_selected and "Sel" or "")
+  else
+    icon_hl_name = tab.is_selected and "TabLineSel" or "TabLine"
+  end
 
   -- If we are making a tab for a filetype we haven't set before, set it now
   if vim.fn.hlexists(icon_hl_name) == 0 then

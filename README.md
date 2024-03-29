@@ -24,6 +24,8 @@ Use your favorite package manager to import the plugin. The plugin can easily be
 <br>
 
 ```lua
+local components = require("gline.components")
+
 require("gline").setup({
   -- Width of each tab/entry in the tabline. Will be overridden if components are bigger than this
   min_entry_width = 24,
@@ -47,7 +49,7 @@ require("gline").setup({
     },
     -- Comes after left padding before right padding
     center = {
-      { components.FtIcon, {} }, -- Requires nvim-web-devicons
+      { components.FtIcon, { colored = true } }, -- Requires nvim-web-devicons
       { components.BufName, { max_len = 16 } },
     },
     -- Comes after right padding
