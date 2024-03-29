@@ -25,28 +25,16 @@ M.config = {
   sections = {
     -- Comes before left padding
     left = {
-      {
-        components.Separator,
-        {
-          normal = {
-            color = "VertSplit", -- 6 digit hex color or highlight group
-            icon = "▏",
-          },
-          selected = {
-            color = "Keyword", -- 6 digit hex color or highlight group
-            icon = "▎",
-          },
-        },
-      },
+      { components.Separator, {} },
     },
     -- Comes after left padding before right padding
     center = {
-      { components.FtIcon, { colored = true } }, -- Requires nvim-web-devicons
-      { components.BufName, { max_len = 16 } },
+      { components.FtIcon, {} }, -- Requires nvim-web-devicons
+      { components.BufName, {} },
     },
     -- Comes after right padding
     right = {
-      { components.Modified, { icon = "●" } },
+      { components.Modified, {} },
     },
   },
 }

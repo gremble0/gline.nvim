@@ -9,6 +9,8 @@
 local M = {}
 
 ---@class Gline.Component.Separator : Gline.Component
+---@field normal {color: string, icon: string}
+---@field selected {color: string, icon: string}
 ---@field norm_hl string
 ---@field sel_hl string
 M.Separator = {}
@@ -28,17 +30,17 @@ function M.Separator:set_highlights()
   -- tablines foreground colors with the active config.
   local norm_fg, sel_fg
 
-  if is_hex_color(self.opts.normal.color) then
-    norm_fg = self.opts.normal.color
+  if is_hex_color(self.normal.color) then
+    norm_fg = self.normal.color
   else
-    local sep_norm_hl = vim.api.nvim_get_hl(0, { name = self.opts.normal.color, link = false })
+    local sep_norm_hl = vim.api.nvim_get_hl(0, { name = self.normal.color, link = false })
     norm_fg = sep_norm_hl.fg
   end
 
-  if is_hex_color(self.opts.selected.color) then
-    sel_fg = self.opts.selected.color
+  if is_hex_color(self.selected.color) then
+    sel_fg = self.selected.color
   else
-    local sep_sel_hl = vim.api.nvim_get_hl(0, { name = self.opts.selected.color, link = false })
+    local sep_sel_hl = vim.api.nvim_get_hl(0, { name = self.selected.color, link = false })
     sel_fg = sep_sel_hl.fg
   end
 
@@ -56,7 +58,14 @@ end
 
 function M.Separator:init(opts)
   local separator = setmetatable({}, M.Separator)
-  separator.opts = opts or {}
+  separator.normal = opts.normal or {
+    color = "VertSplit",
+    icon = "▏",
+  }
+  separator.selected = opts.selected or {
+    color = "Keyword",
+    icon = "▎",
+  }
   separator.norm_hl = "%#TabLineSep#"
   separator.sel_hl = "%#TabLineSelSep#"
   separator:set_highlights()
@@ -65,17 +74,22 @@ function M.Separator:init(opts)
 end
 
 function M.Separator:make(tab)
-  return tab.is_selected and self.sel_hl .. self.opts.selected.icon or self.norm_hl .. self.opts.normal.icon
+  return tab.is_selected and self.sel_hl .. self.selected.icon or self.norm_hl .. self.normal.icon
 end
 
 ---@class Gline.Component.FtIcon : Gline.Component
+---@field colored boolean
 ---@field devicons table
 M.FtIcon = {}
 M.FtIcon.__index = M.FtIcon
 
 function M.FtIcon:init(opts)
   local ft_icon = setmetatable({}, M.FtIcon)
-  ft_icon.opts = opts
+  if opts.colored == false then
+    ft_icon.colored = false
+  else
+    ft_icon.colored = true
+  end
   local success, devicons = pcall(require, "nvim-web-devicons")
   if not success then
     error("gline's filetype component requires having nvim-web-devicons installed")
@@ -90,24 +104,24 @@ function M.FtIcon:make(tab)
   local icon_hl = tab.is_selected and vim.api.nvim_get_hl(0, { name = "TabLineSel", link = false })
     or vim.api.nvim_get_hl(0, { name = "TabLine", link = false })
 
-  local icon, icon_color = self.devicons.get_icon_color_by_filetype(selected_buf_ft, { default = true })
+  local icon, icon_color, icon_hl_name
+  icon, icon_color = self.devicons.get_icon_color_by_filetype(selected_buf_ft, { default = true })
 
-  local icon_hl_name
-  if self.opts.colored then
+  if self.colored then
     icon_hl_name = "TabLineIcon" .. selected_buf_ft .. (tab.is_selected and "Sel" or "")
+    -- If we are making a tab for a filetype we haven't set highlight for before, set it now
+    if vim.fn.hlexists(icon_hl_name) == 0 then
+      vim.api.nvim_set_hl(0, icon_hl_name, vim.tbl_deep_extend("force", icon_hl, { fg = icon_color }))
+    end
   else
     icon_hl_name = tab.is_selected and "TabLineSel" or "TabLine"
-  end
-
-  -- If we are making a tab for a filetype we haven't set before, set it now
-  if vim.fn.hlexists(icon_hl_name) == 0 then
-    vim.api.nvim_set_hl(0, icon_hl_name, vim.tbl_deep_extend("force", icon_hl, { fg = icon_color }))
   end
 
   return "%#" .. icon_hl_name .. "#" .. icon
 end
 
 ---@class Gline.Component.BufName : Gline.Component
+---@field max_len integer
 ---@field norm_hl string
 ---@field sel_hl string
 M.BufName = {}
@@ -115,7 +129,7 @@ M.BufName.__index = M.BufName
 
 function M.BufName:init(opts)
   local buf_name = setmetatable({}, { __index = M.BufName })
-  buf_name.opts = opts or {}
+  buf_name.max_len = opts.max_len or 16
   buf_name.norm_hl = "%#TabLine#"
   buf_name.sel_hl = "%#TabLineSel#"
 
@@ -126,14 +140,15 @@ function M.BufName:make(tab)
   local selected_buf_name = vim.fn.bufname(tab.selected_buf)
   local name = selected_buf_name == "" and "[No Name]" or vim.fn.fnamemodify(selected_buf_name, ":t")
 
-  if #name > self.opts.max_len then
-    name = name:sub(1, self.opts.max_len) .. "…"
+  if #name > self.max_len then
+    name = name:sub(1, self.max_len) .. "…"
   end
 
   return (tab.is_selected and self.sel_hl or self.norm_hl) .. name
 end
 
 ---@class Gline.Component.Modified : Gline.Component
+---@field icon string
 ---@field norm_hl string
 ---@field sel_hl string
 M.Modified = {}
@@ -141,7 +156,7 @@ M.Modified.__index = M.Modified
 
 function M.Modified:init(opts)
   local modified = setmetatable({}, { __index = M.Modified })
-  modified.opts = opts or {}
+  modified.icon = opts.icon or "●"
   modified.norm_hl = "%#TabLine#"
   modified.sel_hl = "%#TabLineSel#"
 
@@ -149,9 +164,8 @@ function M.Modified:init(opts)
 end
 
 function M.Modified:make(tab)
-  --TODO: hl
-  local icon = vim.api.nvim_buf_get_option(tab.selected_buf, "modified") and self.opts.icon
-    or string.rep(" ", vim.fn.strchars(self.opts.icon))
+  local icon = vim.api.nvim_buf_get_option(tab.selected_buf, "modified") and self.icon
+    or string.rep(" ", vim.fn.strchars(self.icon))
 
   return (tab.is_selected and self.sel_hl or self.norm_hl) .. icon
 end
