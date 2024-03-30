@@ -95,18 +95,17 @@ local get_center_padding = function(s)
 end
 
 ---@param tab Gline.TabInfo
----@return string # string representation of a tab entry in the tabline
+---@return string # representation of a tab entry in the tabline
 function M.make_tab(tab)
   local components = {}
-  -- TODO: nested loop
-  for _, factory in ipairs(M.left_components) do
-    table.insert(components, factory:make(tab))
+  for _, component in ipairs(M.left_components) do
+    table.insert(components, component:make(tab))
   end
-  for _, factory in ipairs(M.center_components) do
-    table.insert(components, factory:make(tab))
+  for _, component in ipairs(M.center_components) do
+    table.insert(components, component:make(tab))
   end
-  for _, factory in ipairs(M.right_components) do
-    table.insert(components, factory:make(tab))
+  for _, component in ipairs(M.right_components) do
+    table.insert(components, component:make(tab))
   end
 
   local tabline = table.concat(components, " ")
@@ -122,7 +121,9 @@ end
 
 ---@param conf Gline.Config?
 M.setup = function(conf)
-  config.merge_config(conf)
+  if conf then
+    config.merge_config(conf)
+  end
   M.init_components()
 
   vim.o.tabline = "%!v:lua.nvim_gline()"

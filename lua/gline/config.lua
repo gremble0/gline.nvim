@@ -23,16 +23,13 @@ M.config = {
   min_entry_width = 24,
 
   sections = {
-    -- Comes before left padding
     left = {
       { components.Separator, {} },
     },
-    -- Comes after left padding before right padding
     center = {
       { components.FtIcon, {} }, -- Requires nvim-web-devicons
       { components.BufName, {} },
     },
-    -- Comes after right padding
     right = {
       { components.Modified, {} },
     },
@@ -40,14 +37,12 @@ M.config = {
 }
 
 ---Merge some config with the current config
----@param conf Gline.Config?
+---@param conf Gline.Config
 M.merge_config = function(conf)
-  if conf then
-    M.config = vim.tbl_deep_extend("force", M.config, conf)
-  end
+  M.config = vim.tbl_deep_extend("force", M.config, conf)
 end
 
--- So you can do for example require("gline.config").entry_width instead of require("gline.config").config.entry_width
+-- So you can do for example require("gline.config").min_entry_width instead of require("gline.config").config.min_entry_width
 setmetatable(M, {
   __index = function(_, key)
     return M.config[key]
