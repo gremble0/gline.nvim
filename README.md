@@ -24,6 +24,7 @@ Use your favorite package manager to import the plugin. The plugin can easily be
 <br>
 
 ```lua
+-- ...
 local components = require("gline.components")
 
 M.config = {
@@ -43,39 +44,24 @@ M.config = {
     },
   },
 }
+-- ...
 ```
 Each component defines default options internally, which can be changed by the opts table in the setup function. Here are the options for the default components and their default values
 ```lua
 ---`color` here can either be a 6 digit hex color or a vim highlight group
 ---@class Gline.Component.Separator.Opts
----@field normal? {color: string, icon: string}
----@field selected? {color: string, icon: string}
-separator.normal = opts.normal or {
-  color = "VertSplit",
-  icon = "▏",
-}
-separator.selected = opts.selected or {
-  color = "Keyword",
-  icon = "▎",
-}
+---@field normal? {color?: string, icon?: string} defaults to { color = "VertSplit", icon = "▏" }
+---@field selected? {color?: string, icon?: string} defaults to { color = "Keyword", icon = "▎" }
 
 ---@class Gline.Component.FtIcon.Opts
----@field colored? boolean
-if opts.colored == false then
-  ft_icon.colored = false
-else
-  ft_icon.colored = true
-end
+---@field colored? boolean defaults to true
 
 ---@class Gline.Component.BufName.Opts
----@field max_len? integer
----@field no_name_label? string
-buf_name.max_len = opts.max_len or 16
-buf_name.no_name_label = opts.no_name_label or "[No Name]"
+---@field max_len? integer defaults to 16
+---@field no_name_label? string defaults to "[No Name]"
 
 ---@class Gline.Component.Modified.Opts
----@field icon? string
-modified.icon = opts.icon or "●"
+---@field icon? string defaults to "●"
 ```
 </details>
 

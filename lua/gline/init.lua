@@ -97,6 +97,7 @@ end
 ---@param tab Gline.TabInfo
 ---@return string # representation of a tab entry in the tabline
 function M.make_tab(tab)
+  -- TODO: This whole function is really scuffed, should fix sometime
   local components = {}
   for _, component in ipairs(M.left_components) do
     table.insert(components, component:make(tab))
