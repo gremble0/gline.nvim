@@ -170,6 +170,7 @@ end
 
 ---@class Gline.Component.Modified : Gline.Component
 ---@field icon string
+---@field icon_char_len integer since we cannot do #s on non ascii strings in lua, we calculate this with vim.fn.strchars once
 ---@field norm_hl string
 ---@field sel_hl string
 M.Modified = {}
@@ -179,6 +180,7 @@ M.Modified.__index = M.Modified
 function M.Modified:init(opts)
   local modified = setmetatable({}, { __index = M.Modified })
   modified.icon = opts.icon or "●"
+  modified.icon_char_len = vim.fn.strchars(modified.icon)
   modified.norm_hl = "%#TabLine#"
   modified.sel_hl = "%#TabLineSel#"
 
@@ -187,7 +189,7 @@ end
 
 function M.Modified:make(tab_info)
   local icon = vim.api.nvim_buf_get_option(tab_info.selected_buf, "modified") and self.icon
-    or string.rep(" ", vim.fn.strchars(self.icon))
+    or string.rep(" ", self.icon_char_len)
 
   return (tab_info.is_selected and self.sel_hl or self.norm_hl) .. icon
 end

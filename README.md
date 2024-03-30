@@ -26,44 +26,61 @@ Use your favorite package manager to import the plugin. The plugin can easily be
 ```lua
 local components = require("gline.components")
 
-require("gline").setup({
+M.config = {
   -- Width of each tab/entry in the tabline. Will be overridden if components are bigger than this
   min_entry_width = 24,
 
   sections = {
-    -- Comes before left padding
     left = {
-      {
-        components.Separator,
-        {
-          normal = {
-            color = "VertSplit", -- 6 digit hex color or highlight group
-            icon = "▏",
-          },
-          selected = {
-            color = "Keyword", -- 6 digit hex color or highlight group
-            icon = "▎",
-          },
-        },
-      },
+      { components.Separator, {} },
     },
-    -- Comes after left padding before right padding
     center = {
-      { components.FtIcon, { colored = true } }, -- Requires nvim-web-devicons
-      { components.BufName, { max_len = 16 } },
+      { components.FtIcon, {} }, -- Requires nvim-web-devicons
+      { components.BufName, {} },
     },
-    -- Comes after right padding
     right = {
-      { components.Modified, { icon = "●" } },
+      { components.Modified, {} },
     },
   },
-})
+}
+```
+Each component defines default options internally, which can be changed by the opts table in the setup function. Here are the options for the default components and their default values
+```lua
+---@class Gline.Component.Separator.Opts
+---@field normal? {color: string, icon: string}
+---@field selected? {color: string, icon: string}
+separator.normal = opts.normal or {
+  color = "VertSplit",
+  icon = "▏",
+}
+separator.selected = opts.selected or {
+  color = "Keyword",
+  icon = "▎",
+}
+
+---@class Gline.Component.FtIcon.Opts
+---@field colored? boolean
+if opts.colored == false then
+  ft_icon.colored = false
+else
+  ft_icon.colored = true
+end
+
+---@class Gline.Component.BufName.Opts
+---@field max_len? integer
+---@field no_name_label? string
+buf_name.max_len = opts.max_len or 16
+buf_name.no_name_label = opts.no_name_label or "[No Name]"
+
+---@class Gline.Component.Modified.Opts
+---@field icon? string
+modified.icon = opts.icon or "●"
 ```
 </details>
 
 ## Modifying components
 ### Modifying default components
-To modify the default components you can change the options in the sectinos table. **NOTE:** any definition of a component in the setup function will require a fully defined option table. For example if you want to swap the placements of the `Modified` and `Separator` components you could do it like this:
+To modify the default components you can change the options in the sections table. For example if you want to swap the placements of the `Modified` and `Separator` components, but keep the default options you could do it like this:
 
 ```lua
 local components = require("gline.components")
@@ -75,27 +92,33 @@ require("gline").setup({
   sections = {
     -- Comes before left padding
     left = {
-      { components.Modified, { icon = "●" } },
+      { components.Modified, {} },
     },
     -- `center` will have the same components if omitted from setup
     right = {
+      { components.Separator, {}, },
+    },
+  },
+})
+```
+If you want to change any options you can modify the opts table passed for each component. For example:
+```lua
+local components = require("gline.components")
+
+require("gline").setup({
+  sections = {
+    left = {
       {
         components.Separator,
         {
-          normal = {
-            color = "VertSplit", -- 6 digit hex color or highlight group
-            icon = "▏",
-          },
-          selected = {
-            color = "Keyword", -- 6 digit hex color or highlight group
-            icon = "▎",
-          },
+          selected = { color = "#ff0000", icon = ">" },
         },
       },
     },
   },
 })
 ```
+
 ### Adding your own components
 To add your own components you need to define a component that implements the following interface:
 ```lua
@@ -140,7 +163,7 @@ require("gline").setup({
     -- NOTE: By defining left in the sections here we will override the default config
     -- If you want to add your own components while keeping the defaults, copy from the default config.
     left = {
-      -- [2] here will be passed as opts to ExampleComponent:init({ text = "a" })
+      -- [2] here will be passed as opts like ExampleComponent:init({ selected = "a", normal = "b" })
       { ExampleComponent, { selected = "a", normal = "b" } },
     },
   },
