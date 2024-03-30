@@ -27,7 +27,7 @@ Use your favorite package manager to import the plugin. The plugin can easily be
 local components = require("gline.components")
 
 M.config = {
-  -- Width of each tab/entry in the tabline. Will be overridden if components are bigger than this
+  -- Width of each tab/entry in the tabline. Will be overridden if components together are bigger than this
   min_entry_width = 24,
 
   sections = {
@@ -46,6 +46,7 @@ M.config = {
 ```
 Each component defines default options internally, which can be changed by the opts table in the setup function. Here are the options for the default components and their default values
 ```lua
+---`color` here can either be a 6 digit hex color or a vim highlight group
 ---@class Gline.Component.Separator.Opts
 ---@field normal? {color: string, icon: string}
 ---@field selected? {color: string, icon: string}
@@ -125,7 +126,8 @@ To add your own components you need to define a component that implements the fo
 ---@class Gline.Component
 ---@field init fun(self: Gline.Component, opts?: table<string, any>): Gline.Component constructor method that initializes the factory
 ---@field make fun(self: Gline.Component, tab: Gline.TabInfo): string makes this components string given some tabinfo
----@field opts table<string, any>
+---@field norm_hl string highlight used for normal tabs
+---@field sel_hl string highlight used for the selected tab
 ```
 
 Where `Gline.TabInfo` contains data commonly used within components. It is defined as follows:
@@ -143,19 +145,25 @@ The `:init()` method should do things you want to only be executed once, when do
 Here is a very simple example of how you can make a custom component and include it in your tabline
 ```lua
 ---@class Gline.Component.Example : Gline.Component
+---@field selected string
+---@field normal string
 local ExampleComponent = {}
 ExampleComponent.__index = ExampleComponent
 
 function ExampleComponent:init(opts)
   local example = setmetatable({}, ExampleComponent)
-  example.opts = opts or {}
+  -- See `:help statusline` for how vim renders strings for the tabline, if you dont understand "%#TabLine#"
+  example.norm_hl = "%#TabLine#"
+  example.sel_hl = "%#Error#"
+  -- Parsing opts just to show how you could do that. For personal components you
+  -- could just ignore the opts parameter
+  example.normal = opts.normal or "a"
+  example.selected = opts.selected or "b"
   return example
 end
 
 function ExampleComponent:make(tab)
-  -- For actual components you should probably do some sort of logic for highlights.
-  -- See `:help statusline` for how vim renders strings for the tabline
-  return tab.is_selected and self.opts.selected or self.opts.normal
+  return tab.is_selected and (self.sel_hl .. self.selected) or (self.norm_hl .. self.normal)
 end
 
 require("gline").setup({
@@ -163,8 +171,8 @@ require("gline").setup({
     -- NOTE: By defining left in the sections here we will override the default config
     -- If you want to add your own components while keeping the defaults, copy from the default config.
     left = {
-      -- [2] here will be passed as opts like ExampleComponent:init({ selected = "a", normal = "b" })
-      { ExampleComponent, { selected = "a", normal = "b" } },
+      -- [2] here will be passed as opts like ExampleComponent:init({ selected = "c" })
+      { ExampleComponent, { selected = "c" } },
     },
   },
 })

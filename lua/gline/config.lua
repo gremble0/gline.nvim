@@ -19,7 +19,7 @@ local M = {}
 ---The active config used for gline, can be modified by the user through the setup function
 ---@type Gline.Config
 M.config = {
-  -- Width of each tab/entry in the tabline. Will be overridden if components are bigger than this
+  -- Width of each tab/entry in the tabline. Will be overridden if components together are bigger than this
   min_entry_width = 24,
 
   sections = {

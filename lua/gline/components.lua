@@ -9,6 +9,7 @@
 ---@class Gline.DefaultComponents
 local M = {}
 
+---`color` here can either be a 6 digit hex color or a vim highlight group
 ---@class Gline.Component.Separator.Opts
 ---@field normal? {color: string, icon: string}
 ---@field selected? {color: string, icon: string}
