@@ -1,4 +1,4 @@
-*gline-nvim.txt*                                           Last change: 2023-02-21
+*gline-nvim.txt*                                           Last change: 2024-03-31
 ================================================================================
 Table of Contents                                                 *gline.contents*
 Introduction ................................................ |gline.introduction|
@@ -25,42 +25,42 @@ for most of its theming (see `:help nvim_set_hl()` if you want to override the
 colors from your current colorscheme)
 
 >lua
-{
-  "gremble0/gline.nvim",
-  -- nvim-web-devicons is required by default. If you don't want the file type icon
-  -- component you can remove the dependency and redefine the center section in the setup (see below)
-  dependencies = "nvim-tree/nvim-web-devicons",
-  -- Uncomment if you want to lazy load
-  -- event = "TabNew"
-  config = function()
-    require("gline").setup()
-  end
+  {
+    "gremble0/gline.nvim",
+    -- nvim-web-devicons is required by default. If you don't want the file type icon
+    -- component you can remove the dependency and redefine the center section in the setup (see below)
+    dependencies = "nvim-tree/nvim-web-devicons",
+    -- Uncomment if you want to lazy load
+    -- event = "TabNew"
+    config = function()
+      require("gline").setup()
+    end
 }
 <
 ================================================================================
 Default configuration                                *gline.default-configuration*
 >lua
--- ...
-local components = require("gline.components")
+  -- ...
+  local components = require("gline.components")
 
-{
-  -- Width of each tab/entry in the tabline. Will be overridden if components together are bigger than this
-  min_entry_width = 24,
+  {
+    -- Width of each tab/entry in the tabline. Will be overridden if components together are bigger than this
+    min_entry_width = 24,
 
-  sections = {
-    left = {
-      { components.Separator, {} },
+    sections = {
+      left = {
+        { components.Separator, {} },
+      },
+      center = {
+        { components.FtIcon, {} }, -- Requires nvim-web-devicons
+        { components.BufName, {} },
+      },
+      right = {
+        { components.Modified, {} },
+      },
     },
-    center = {
-      { components.FtIcon, {} }, -- Requires nvim-web-devicons
-      { components.BufName, {} },
-    },
-    right = {
-      { components.Modified, {} },
-    },
-  },
-}
--- ...
+  }
+  -- ...
 <
 
 Each component defines default options internally, which can be changed by the
@@ -68,20 +68,20 @@ opts table in the setup function. Here are the options for the default
 components and their default values.
 
 >lua
----`color` here can either be a 6 digit hex color or a vim highlight group
----@class Gline.Component.Separator.Opts
----@field normal? {color?: string, icon?: string} defaults to { color = "VertSplit", icon = "▏" }
----@field selected? {color?: string, icon?: string} defaults to { color = "Keyword", icon = "▎" }
+  ---`color` here can either be a 6 digit hex color or a vim highlight group
+  ---@class Gline.Component.Separator.Opts
+  ---@field normal? {color?: string, icon?: string} defaults to { color = "VertSplit", icon = "▏" }
+  ---@field selected? {color?: string, icon?: string} defaults to { color = "Keyword", icon = "▎" }
 
----@class Gline.Component.FtIcon.Opts
----@field colored? boolean defaults to true
+  ---@class Gline.Component.FtIcon.Opts
+  ---@field colored? boolean defaults to true
 
----@class Gline.Component.BufName.Opts
----@field max_len? integer defaults to 16
----@field no_name_label? string defaults to "[No Name]"
+  ---@class Gline.Component.BufName.Opts
+  ---@field max_len? integer defaults to 16
+  ---@field no_name_label? string defaults to "[No Name]"
 
----@class Gline.Component.Modified.Opts
----@field icon? string defaults to "●"
+  ---@class Gline.Component.Modified.Opts
+  ---@field icon? string defaults to "●"
 <
 
 ================================================================================
@@ -94,35 +94,35 @@ table. For example if you want to swap the placements of the `Modified` and
 `Separator` components, but keep the default options you could do it like this:
 
 >lua
-local components = require("gline.components")
+  local components = require("gline.components")
 
-require("gline").setup({
-  sections = {
-    left = {
-      { components.Modified, {} },
+  require("gline").setup({
+    sections = {
+      left = {
+        { components.Modified, {} },
+      },
+      -- `center` will have the same components if omitted from setup
+      right = {
+        { components.Separator, {}, },
+      },
     },
-    -- `center` will have the same components if omitted from setup
-    right = {
-      { components.Separator, {}, },
-    },
-  },
-})
+  })
 <
 
 If you want to change any options you can modify the opts table passed for
 each component. For example:
 
 >lua
-local components = require("gline.components")
+  local components = require("gline.components")
 
-require("gline").setup({
-  sections = {
-    left = {
-      -- `normal` will keep its default configuration if omitted from the options table
-      { components.Separator, { selected = { color = "#ff0000", icon = ">" } } },
+  require("gline").setup({
+    sections = {
+      left = {
+        -- `normal` will keep its default configuration if omitted from the options table
+        { components.Separator, { selected = { color = "#ff0000", icon = ">" } } },
+      },
     },
-  },
-})
+  })
 <
 
 ================================================================================
@@ -132,23 +132,23 @@ To add your own components you need to define a component that implements the
 following interface:
 
 >lua
----@class Gline.Component
----@field init fun(self: Gline.Component, opts?: table<string, any>): Gline.Component constructor method, opts is different for each implementor
----@field make fun(self: Gline.Component, tab_info: Gline.TabInfo): string makes this components string given some tabinfo
----@field normal table<string, any> options for a component when its in a tab thats not selected
----@field selected table<string, any> options for a component when its in a tab that is selected
+  ---@class Gline.Component
+  ---@field init fun(self: Gline.Component, opts?: table<string, any>): Gline.Component constructor method, opts is different for each implementor
+  ---@field make fun(self: Gline.Component, tab_info: Gline.TabInfo): string makes this components string given some tabinfo
+  ---@field normal table<string, any> options for a component when its in a tab thats not selected
+  ---@field selected table<string, any> options for a component when its in a tab that is selected
 <
 
 The `normal` and `selected` tables are just a suggestion for how to organize your
 component but are in practice optional. `Gline.TabInfo` contains data commonly used within components. It is defined as follows:
 
 >lua
----@class Gline.TabInfo
----@field tabnr integer
----@field variables table<string, any>
----@field windows integer[]
----@field is_selected boolean
----@field selected_buf integer
+  ---@class Gline.TabInfo
+  ---@field tabnr integer
+  ---@field variables table<string, any>
+  ---@field windows integer[]
+  ---@field is_selected boolean
+  ---@field selected_buf integer
 <
 
 The `:init()` method should do things you want to only be executed once, when
@@ -161,37 +161,37 @@ Here is a very simple example of how you can make a custom component and
 include it in your tabline
 
 >lua
----@class Gline.Component.Example : Gline.Component
-local ExampleComponent = {}
-ExampleComponent.__index = ExampleComponent
+  ---@class Gline.Component.Example : Gline.Component
+  local ExampleComponent = {}
+  ExampleComponent.__index = ExampleComponent
 
-function ExampleComponent:init(opts)
-  local example = setmetatable({}, ExampleComponent)
-  -- See `:help statusline` for how vim renders strings for the tabline, if you dont understand "%#TabLine#"
+  function ExampleComponent:init(opts)
+    local example = setmetatable({}, ExampleComponent)
+    -- See `:help statusline` for how vim renders strings for the tabline, if you dont understand "%#TabLine#"
 
-  -- Parsing opts just to show how you could do that. For personal components you
-  -- could just ignore the opts parameter
-  example.normal = { text = opts.normal and opts.normal.text or "a", highlight = "%#TabLine#" }
-  example.selected = { text = opts.selected and opts.selected.text or "b", highlight = "%#Error#" }
+    -- Parsing opts just to show how you could do that. For personal components you
+    -- could just ignore the opts parameter
+    example.normal = { text = opts.normal and opts.normal.text or "a", highlight = "%#TabLine#" }
+    example.selected = { text = opts.selected and opts.selected.text or "b", highlight = "%#Error#" }
 
-  return example
-end
+    return example
+  end
 
-function ExampleComponent:make(tab)
-  return tab.is_selected and (self.selected.highlight .. self.selected.text)
-    or (self.normal.highlight .. self.normal.text)
-end
+  function ExampleComponent:make(tab)
+    return tab.is_selected and (self.selected.highlight .. self.selected.text)
+      or (self.normal.highlight .. self.normal.text)
+  end
 
-require("gline").setup({
-  sections = {
-    -- NOTE: By defining left in the sections here we will override the left components in the default config
-    -- If you want to append your component to the default, just copy from the default config (see `Show full default configuration`)
-    left = {
-      -- [2] here will be passed as opts like ExampleComponent:init({ selected = "c" })
-      { ExampleComponent, { selected = { text = "c" } } },
+  require("gline").setup({
+    sections = {
+      -- NOTE: By defining left in the sections here we will override the left components in the default config
+      -- If you want to append your component to the default, just copy from the default config (see `Show full default configuration`)
+      left = {
+        -- [2] here will be passed as opts like ExampleComponent:init({ selected = "c" })
+        { ExampleComponent, { selected = { text = "c" } } },
+      },
     },
-  },
-})
+  })
 <
 
 
